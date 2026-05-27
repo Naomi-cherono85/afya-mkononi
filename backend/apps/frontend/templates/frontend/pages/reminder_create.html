@@ -1,0 +1,145 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}Set a reminder — Afya Mkononi{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-[1fr_320px] gap-6">
+
+    <section class="min-w-0">
+
+        <div id="rem-form-card" class="bg-background rounded-card shadow-card p-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-11 h-11 rounded-soft bg-accent-soft flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-foreground">Set a reminder</h1>
+                    <p class="text-foreground/60 text-sm mt-0.5">We'll surface it at the time you choose — for medications, follow-ups, or anything you don't want to forget.</p>
+                </div>
+            </div>
+
+            <div id="rem-form-error" class="hidden mb-4 p-3 rounded-soft bg-danger-soft text-danger text-sm border border-danger/20"></div>
+
+            <form id="rem-form" novalidate class="flex flex-col gap-5">
+                {% csrf_token %}
+
+                <div class="grid md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="patient_name" class="block text-sm font-medium text-foreground mb-1.5">Full name</label>
+                        <input type="text" id="patient_name" name="patient_name" required
+                               class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
+                        <p class="hidden mt-1 text-xs text-danger" data-error-for="patient_name"></p>
+                    </div>
+                    <div>
+                        <label for="reminder_type" class="block text-sm font-medium text-foreground mb-1.5">Reminder type</label>
+                        <select id="reminder_type" name="reminder_type" required
+                                class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
+                            {% for value, label in reminder_type_choices %}
+                                <option value="{{ value }}" {% if value == 'MEDICATION' %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <p class="hidden mt-1 text-xs text-danger" data-error-for="reminder_type"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="reminder_message" class="block text-sm font-medium text-foreground mb-1.5">What is this reminder about?</label>
+                    <textarea id="reminder_message" name="reminder_message" required rows="3"
+                              placeholder="e.g. Take 1 tablet of Amoxicillin with food."
+                              class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background resize-none"></textarea>
+                    <p class="hidden mt-1 text-xs text-danger" data-error-for="reminder_message"></p>
+                </div>
+
+                <div>
+                    <label for="scheduled_for" class="block text-sm font-medium text-foreground mb-1.5">When should we remind you?</label>
+                    <input type="datetime-local" id="scheduled_for" name="scheduled_for" required
+                           class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
+                    <p class="hidden mt-1 text-xs text-danger" data-error-for="scheduled_for"></p>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-border/70">
+                    <p class="text-xs text-foreground/50">You can review and manage reminders from the dashboard.</p>
+                    <button type="submit" id="rem-submit"
+                            class="px-6 py-2.5 bg-accent text-white rounded-pill text-sm font-semibold hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm">
+                        Set reminder
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="rem-success-card" class="hidden bg-background rounded-card shadow-card p-8">
+            <div class="flex items-start gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center shrink-0 ring-4 ring-accent-tint/40">
+                    <svg class="w-7 h-7 text-accent" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <h2 class="text-xl font-bold text-foreground mb-1">Reminder set</h2>
+                    <p class="text-foreground/60 text-sm">We'll surface this at the scheduled time.</p>
+                </div>
+            </div>
+
+            <dl class="grid grid-cols-[140px_1fr] gap-y-3 text-sm mb-6 border-t border-border pt-5">
+                <dt class="text-foreground/55">Name</dt>      <dd class="font-medium text-foreground" data-field="patient_name"></dd>
+                <dt class="text-foreground/55">Type</dt>      <dd class="font-medium text-foreground" data-field="reminder_type"></dd>
+                <dt class="text-foreground/55">When</dt>      <dd class="font-medium text-foreground" data-field="scheduled_for"></dd>
+                <dt class="text-foreground/55">Message</dt>   <dd class="font-medium text-foreground" data-field="reminder_message"></dd>
+                <dt class="text-foreground/55">Status</dt>    <dd><span class="text-xs font-medium px-2 py-0.5 rounded-pill bg-primary/10 text-primary" data-field="status"></span></dd>
+            </dl>
+
+            <div class="flex gap-3">
+                <button type="button" id="rem-create-another"
+                        class="px-5 py-2.5 bg-accent text-white rounded-pill text-sm font-semibold hover:bg-accent-hover transition shadow-sm">
+                    Create another
+                </button>
+                <a href="{% url 'frontend:dashboard' %}"
+                   class="px-5 py-2.5 bg-muted text-foreground rounded-pill text-sm font-semibold border border-border hover:bg-background transition">
+                    Back to dashboard
+                </a>
+            </div>
+        </div>
+
+    </section>
+
+    <aside class="flex flex-col gap-4">
+        <div class="bg-background rounded-card shadow-card p-6">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-7 h-7 rounded-soft bg-accent-soft flex items-center justify-center">
+                    <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+                </div>
+                <h3 class="font-semibold text-sm text-foreground">Recent reminders</h3>
+            </div>
+            {% if recent_reminders %}
+                <ul class="flex flex-col gap-3">
+                    {% for r in recent_reminders %}
+                        <li class="bg-muted/40 border border-border/60 rounded-soft p-3.5">
+                            <div class="text-sm font-medium text-foreground truncate">{{ r.reminder_message|truncatechars:36 }}</div>
+                            <div class="text-xs text-foreground/60 mt-1">{{ r.scheduled_for|date:"D, j M" }} &middot; {{ r.scheduled_for|time:"g:i A" }}</div>
+                            <div class="flex items-center justify-between mt-2">
+                                <span class="text-xs text-foreground/55">{{ r.get_reminder_type_display }}</span>
+                                <span class="text-xs font-medium px-2 py-0.5 rounded-pill
+                                    {% if r.status == 'SENT' %}bg-accent/15 text-accent
+                                    {% elif r.status == 'PENDING' %}bg-primary/10 text-primary
+                                    {% else %}bg-muted text-foreground/60{% endif %}">
+                                    {{ r.get_status_display }}
+                                </span>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="bg-muted/40 rounded-soft p-5 text-center">
+                    <p class="text-xs text-foreground/60">No reminders yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </aside>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'frontend/js/reminder_form.js' %}" defer></script>
+{% endblock %}

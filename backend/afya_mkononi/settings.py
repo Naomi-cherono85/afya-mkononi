@@ -30,6 +30,9 @@ INSTALLED_APPS = [
 
     # Third-party
     'rest_framework',
+    'tailwind',
+    'theme',
+    'django_browser_reload',
 
     # Local apps
     'apps.core',
@@ -37,7 +40,12 @@ INSTALLED_APPS = [
     'apps.chatbot',
     'apps.appointments',
     'apps.reminders',
+    'apps.frontend',
 ]
+
+TAILWIND_APP_NAME = 'theme'
+INTERNAL_IPS = ['127.0.0.1']
+NPM_BIN_PATH = r'C:\Program Files\nodejs\npm.cmd'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -47,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_browser_reload.middleware.BrowserReloadMiddleware',
 ]
 
 ROOT_URLCONF = 'afya_mkononi.urls'
@@ -97,3 +106,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Anthropic Claude (chatbot AI service)
+ANTHROPIC_API_KEY = config('AI_API_KEY', default='')
+ANTHROPIC_MODEL = config('ANTHROPIC_MODEL', default='claude-haiku-4-5')
+ANTHROPIC_MAX_TOKENS = config('ANTHROPIC_MAX_TOKENS', default=1024, cast=int)
+ANTHROPIC_HISTORY_TURNS = config('ANTHROPIC_HISTORY_TURNS', default=10, cast=int)

@@ -1,0 +1,44 @@
+{% with active=request.resolver_match.url_name %}
+<div class="flex flex-col gap-4">
+
+    <a href="{% url 'frontend:dashboard' %}" class="block bg-background rounded-card shadow-card p-5 hover:shadow-card-hover transition">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-soft bg-accent-soft flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"/>
+                </svg>
+            </div>
+            <div class="leading-tight min-w-0">
+                <div class="font-semibold text-foreground">Afya Mkononi</div>
+                <div class="text-xs text-foreground/55 truncate">AI-powered patient support</div>
+            </div>
+        </div>
+    </a>
+
+    <nav class="bg-background rounded-card shadow-card p-2 flex flex-col gap-0.5">
+        {% include 'frontend/partials/_nav_item.html' with url_name='dashboard' label='Dashboard' sublabel='Home & overview' active=active icon='home' %}
+        {% include 'frontend/partials/_nav_item.html' with url_name='appointment-book' label='Appointments' sublabel='Book & manage' active=active icon='calendar' %}
+        {% include 'frontend/partials/_nav_item.html' with url_name='reminder-create' label='Reminders' sublabel='Medication & follow-ups' active=active icon='bell' %}
+        {% include 'frontend/partials/_nav_item.html' with url_name='chat' label='Chat Assistant' sublabel='Get health guidance' active=active icon='chat' %}
+        {% include 'frontend/partials/_nav_item.html' with url_name='about' label='About & Help' sublabel='How Afya Mkononi works' active=active icon='info' %}
+    </nav>
+
+    <div class="bg-danger-soft rounded-card p-5 border border-danger/15">
+        <div class="flex items-start gap-3 mb-3">
+            <div class="w-9 h-9 rounded-soft bg-background flex items-center justify-center shrink-0 shadow-sm">
+                <svg class="w-5 h-5 text-danger" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <div class="font-semibold text-foreground text-sm">Need urgent help?</div>
+                <p class="text-xs text-foreground/65 mt-1 leading-relaxed">If it's an emergency, please call your local emergency number.</p>
+            </div>
+        </div>
+        <a href="{% url 'frontend:about' %}#emergency" class="block w-full text-center bg-background text-danger font-medium text-sm py-2 rounded-pill border border-danger/25 hover:bg-danger hover:text-white hover:border-danger transition">
+            Emergency Guide
+        </a>
+    </div>
+
+</div>
+{% endwith %}

@@ -1,0 +1,155 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}Book an appointment — Afya Mkononi{% endblock %}
+
+{% block content %}
+<div class="grid grid-cols-[1fr_320px] gap-6">
+
+    <section class="min-w-0">
+
+        <div id="appt-form-card" class="bg-background rounded-card shadow-card p-8">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-11 h-11 rounded-soft bg-accent-soft flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-foreground">Book an appointment</h1>
+                    <p class="text-foreground/60 text-sm mt-0.5">Pick a date and time and tell us briefly what you'd like to see the clinic about.</p>
+                </div>
+            </div>
+
+            <div id="appt-form-error" class="hidden mb-4 p-3 rounded-soft bg-danger-soft text-danger text-sm border border-danger/20"></div>
+
+            <form id="appt-form" novalidate class="flex flex-col gap-5">
+                {% csrf_token %}
+
+                <div class="grid md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="patient_name" class="block text-sm font-medium text-foreground mb-1.5">Full name</label>
+                        <input type="text" id="patient_name" name="patient_name" required
+                               class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
+                        <p class="hidden mt-1 text-xs text-danger" data-error-for="patient_name"></p>
+                    </div>
+                    <div>
+                        <label for="phone_number" class="block text-sm font-medium text-foreground mb-1.5">Phone number</label>
+                        <input type="tel" id="phone_number" name="phone_number" required placeholder="+254 700 000 000"
+                               class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
+                        <p class="hidden mt-1 text-xs text-danger" data-error-for="phone_number"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-foreground mb-1.5">Email <span class="text-foreground/50 font-normal">(optional)</span></label>
+                    <input type="email" id="email" name="email"
+                           class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
+                    <p class="hidden mt-1 text-xs text-danger" data-error-for="email"></p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-5">
+                    <div>
+                        <label for="preferred_date" class="block text-sm font-medium text-foreground mb-1.5">Preferred date</label>
+                        <input type="date" id="preferred_date" name="preferred_date" required
+                               class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
+                        <p class="hidden mt-1 text-xs text-danger" data-error-for="preferred_date"></p>
+                    </div>
+                    <div>
+                        <label for="preferred_time" class="block text-sm font-medium text-foreground mb-1.5">Preferred time</label>
+                        <input type="time" id="preferred_time" name="preferred_time" required
+                               class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
+                        <p class="hidden mt-1 text-xs text-danger" data-error-for="preferred_time"></p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="reason_for_visit" class="block text-sm font-medium text-foreground mb-1.5">Reason for visit</label>
+                    <textarea id="reason_for_visit" name="reason_for_visit" required rows="3"
+                              placeholder="A short description of what you'd like to see the clinic about."
+                              class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background resize-none"></textarea>
+                    <p class="hidden mt-1 text-xs text-danger" data-error-for="reason_for_visit"></p>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-border/70">
+                    <p class="text-xs text-foreground/50">The clinic will confirm your appointment shortly.</p>
+                    <button type="submit" id="appt-submit"
+                            class="px-6 py-2.5 bg-accent text-white rounded-pill text-sm font-semibold hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm">
+                        Book appointment
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="appt-success-card" class="hidden bg-background rounded-card shadow-card p-8">
+            <div class="flex items-start gap-4 mb-6">
+                <div class="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center shrink-0 ring-4 ring-accent-tint/40">
+                    <svg class="w-7 h-7 text-accent" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
+                    </svg>
+                </div>
+                <div class="min-w-0">
+                    <h2 class="text-xl font-bold text-foreground mb-1">Appointment booked</h2>
+                    <p class="text-foreground/60 text-sm">Your appointment has been recorded. The clinic will confirm shortly.</p>
+                </div>
+            </div>
+
+            <dl class="grid grid-cols-[140px_1fr] gap-y-3 text-sm mb-6 border-t border-border pt-5">
+                <dt class="text-foreground/55">Name</dt>      <dd class="font-medium text-foreground" data-field="patient_name"></dd>
+                <dt class="text-foreground/55">Phone</dt>     <dd class="font-medium text-foreground" data-field="phone_number"></dd>
+                <dt class="text-foreground/55">Date</dt>      <dd class="font-medium text-foreground" data-field="preferred_date"></dd>
+                <dt class="text-foreground/55">Time</dt>      <dd class="font-medium text-foreground" data-field="preferred_time"></dd>
+                <dt class="text-foreground/55">Reason</dt>    <dd class="font-medium text-foreground" data-field="reason_for_visit"></dd>
+                <dt class="text-foreground/55">Status</dt>    <dd><span class="text-xs font-medium px-2 py-0.5 rounded-pill bg-primary/10 text-primary" data-field="status"></span></dd>
+            </dl>
+
+            <div class="flex gap-3">
+                <button type="button" id="appt-book-another"
+                        class="px-5 py-2.5 bg-accent text-white rounded-pill text-sm font-semibold hover:bg-accent-hover transition shadow-sm">
+                    Book another
+                </button>
+                <a href="{% url 'frontend:dashboard' %}"
+                   class="px-5 py-2.5 bg-muted text-foreground rounded-pill text-sm font-semibold border border-border hover:bg-background transition">
+                    Back to dashboard
+                </a>
+            </div>
+        </div>
+
+    </section>
+
+    <aside class="flex flex-col gap-4">
+        <div class="bg-background rounded-card shadow-card p-6">
+            <div class="flex items-center gap-2 mb-4">
+                <div class="w-7 h-7 rounded-soft bg-accent-soft flex items-center justify-center">
+                    <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                </div>
+                <h3 class="font-semibold text-sm text-foreground">Recent appointments</h3>
+            </div>
+            {% if recent_appointments %}
+                <ul class="flex flex-col gap-3">
+                    {% for appt in recent_appointments %}
+                        <li class="bg-muted/40 border border-border/60 rounded-soft p-3.5">
+                            <div class="text-sm font-medium text-foreground truncate">{{ appt.reason_for_visit|truncatechars:32 }}</div>
+                            <div class="text-xs text-foreground/60 mt-1">{{ appt.preferred_date|date:"D, j M" }} &middot; {{ appt.preferred_time|time:"g:i A" }}</div>
+                            <span class="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded-pill
+                                {% if appt.status == 'CONFIRMED' %}bg-accent/15 text-accent
+                                {% elif appt.status == 'PENDING' %}bg-primary/10 text-primary
+                                {% elif appt.status == 'COMPLETED' %}bg-muted text-foreground/60
+                                {% else %}bg-danger-soft text-danger{% endif %}">
+                                {{ appt.get_status_display }}
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="bg-muted/40 rounded-soft p-5 text-center">
+                    <p class="text-xs text-foreground/60">No appointments yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    </aside>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'frontend/js/appointment_form.js' %}" defer></script>
+{% endblock %}

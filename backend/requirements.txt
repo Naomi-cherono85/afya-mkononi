@@ -7,3 +7,5 @@ anthropic>=0.40
 gunicorn>=22.0
 whitenoise>=6.6
 django-ratelimit>=4.1
+django-tailwind[reload]>=4.4
+

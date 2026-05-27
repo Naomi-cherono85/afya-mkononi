@@ -1,0 +1,130 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}About &amp; Help — Afya Mkononi{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-6 max-w-[860px]">
+
+    <section class="bg-background rounded-card shadow-card p-8 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-accent-soft/70"></div>
+        <div class="relative">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-pill bg-accent-soft text-accent text-xs font-medium mb-4">
+                <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
+                About Afya Mkononi
+            </div>
+            <h1 class="text-3xl font-bold text-foreground mb-3">Your AI-powered health companion</h1>
+            <p class="text-foreground/70 leading-relaxed max-w-2xl">
+                Afya Mkononi is an AI-powered health assistant that helps you ask general health questions,
+                book clinic appointments, and stay on top of medications and follow-ups &mdash; all from one
+                place. It is built to make routine support easier, not to replace your doctor.
+            </p>
+        </div>
+    </section>
+
+    <section class="bg-background rounded-card shadow-card p-8">
+        <h2 class="text-xl font-bold text-foreground mb-6">How it works</h2>
+        <div class="grid md:grid-cols-3 gap-6">
+
+            <div class="p-5 rounded-soft bg-accent-soft/40 border border-accent-tint/40">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center text-sm font-bold shadow-sm">1</div>
+                    <h3 class="font-semibold text-foreground">Ask</h3>
+                </div>
+                <p class="text-sm text-foreground/65 leading-relaxed">
+                    Chat with the assistant about general health topics &mdash; symptoms, prevention,
+                    medication basics, when to see a clinician.
+                </p>
+            </div>
+
+            <div class="p-5 rounded-soft bg-accent-soft/40 border border-accent-tint/40">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center text-sm font-bold shadow-sm">2</div>
+                    <h3 class="font-semibold text-foreground">Book</h3>
+                </div>
+                <p class="text-sm text-foreground/65 leading-relaxed">
+                    Schedule an appointment with your clinic. Pick a date and time, share the reason,
+                    and the clinic takes it from there.
+                </p>
+            </div>
+
+            <div class="p-5 rounded-soft bg-accent-soft/40 border border-accent-tint/40">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-9 h-9 rounded-full bg-accent text-white flex items-center justify-center text-sm font-bold shadow-sm">3</div>
+                    <h3 class="font-semibold text-foreground">Remind</h3>
+                </div>
+                <p class="text-sm text-foreground/65 leading-relaxed">
+                    Set reminders for medications, follow-up visits, or anything else you don't want
+                    to forget. We'll surface them at the right time.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="bg-background rounded-card shadow-card p-8">
+        <h2 class="text-xl font-bold text-foreground mb-2">What Afya Mkononi will not do</h2>
+        <p class="text-foreground/60 text-sm mb-5">These boundaries are built into the assistant by design.</p>
+
+        <ul class="space-y-4">
+            <li class="flex items-start gap-3">
+                <div class="w-7 h-7 rounded-full bg-danger-soft text-danger flex items-center justify-center shrink-0 mt-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                </div>
+                <div>
+                    <div class="font-semibold text-sm text-foreground mb-0.5">No diagnoses</div>
+                    <p class="text-sm text-foreground/65 leading-relaxed">The assistant never tells you what condition you have. Only a clinician can do that, in person.</p>
+                </div>
+            </li>
+            <li class="flex items-start gap-3">
+                <div class="w-7 h-7 rounded-full bg-danger-soft text-danger flex items-center justify-center shrink-0 mt-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                </div>
+                <div>
+                    <div class="font-semibold text-sm text-foreground mb-0.5">No prescriptions</div>
+                    <p class="text-sm text-foreground/65 leading-relaxed">The assistant will not tell you to start, stop, or change a medication. Always check with a licensed provider.</p>
+                </div>
+            </li>
+            <li class="flex items-start gap-3">
+                <div class="w-7 h-7 rounded-full bg-danger-soft text-danger flex items-center justify-center shrink-0 mt-0.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                </div>
+                <div>
+                    <div class="font-semibold text-sm text-foreground mb-0.5">No replacement for professional care</div>
+                    <p class="text-sm text-foreground/65 leading-relaxed">Afya Mkononi provides general information only. If your situation is serious or unclear, talk to a clinician.</p>
+                </div>
+            </li>
+        </ul>
+    </section>
+
+    <section id="emergency" class="bg-danger-soft border border-danger/20 rounded-card p-8 scroll-mt-6">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-soft bg-background flex items-center justify-center shrink-0 shadow-sm">
+                <svg class="w-7 h-7 text-danger" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <h2 class="text-xl font-bold text-foreground mb-2">If it is an emergency, call for help first</h2>
+                <p class="text-foreground/70 mb-4 leading-relaxed">
+                    Do not use Afya Mkononi for emergencies. Call your local emergency number
+                    or go to the nearest emergency department right away if you have any of these:
+                </p>
+                <ul class="grid sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-foreground/75 list-disc pl-5">
+                    <li>Severe chest pain</li>
+                    <li>Difficulty breathing</li>
+                    <li>Severe bleeding</li>
+                    <li>Loss of consciousness</li>
+                    <li>Stroke-like symptoms (face drooping, arm weakness, slurred speech)</li>
+                    <li>Severe allergic reaction</li>
+                    <li>Pregnancy danger signs</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}
+
+{% block footer_strip %}
+    {% include 'frontend/partials/feature_strip.html' %}
+{% endblock %}

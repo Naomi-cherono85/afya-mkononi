@@ -12,4 +12,6 @@ urlpatterns = [
     path('api/', include('apps.appointments.urls')),
     path('api/', include('apps.reminders.urls')),
     path('api/', include('apps.chatbot.urls')),
+    path('__reload__/', include('django_browser_reload.urls')),
+    path('', include('apps.frontend.urls')),
 ]
