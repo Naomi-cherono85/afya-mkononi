@@ -1,0 +1,37 @@
+{% extends 'accounts/auth_base.html' %}
+
+{% block title %}Create your account — Afya Mkononi{% endblock %}
+
+{% block card %}
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-foreground mb-1">Create your account</h1>
+        <p class="text-sm text-foreground/60">Join Afya Mkononi to get personalised health support.</p>
+    </div>
+
+    {% if form.non_field_errors %}
+        <div class="text-sm px-4 py-3 rounded-soft bg-danger-soft border border-danger/20 text-danger mb-5">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% include 'accounts/_field.html' with field=form.username %}
+        <div class="grid grid-cols-2 gap-3">
+            {% include 'accounts/_field.html' with field=form.first_name %}
+            {% include 'accounts/_field.html' with field=form.last_name %}
+        </div>
+        {% include 'accounts/_field.html' with field=form.email %}
+        {% include 'accounts/_field.html' with field=form.password1 %}
+        {% include 'accounts/_field.html' with field=form.password2 %}
+
+        <button type="submit" class="w-full bg-accent text-white font-medium text-sm py-3 rounded-pill hover:bg-accent-hover transition mt-2">
+            Create account
+        </button>
+    </form>
+
+    <p class="text-center text-sm text-foreground/60 mt-6">
+        Already have an account?
+        <a href="{% url 'accounts:login' %}" class="text-accent font-medium hover:underline">Sign in</a>
+    </p>
+{% endblock %}

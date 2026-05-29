@@ -1,0 +1,62 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}My Profile — Afya Mkononi{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto flex flex-col gap-6">
+
+    <div class="bg-background rounded-card shadow-card p-6 sm:p-8">
+        <div class="flex items-center gap-4 mb-6">
+            {% if user.profile.avatar %}
+                <img src="{{ user.profile.avatar.url }}" alt="{{ user.profile.display_name }}"
+                     class="w-16 h-16 rounded-full object-cover ring-2 ring-accent-tint">
+            {% else %}
+                <div class="w-16 h-16 rounded-full bg-accent-soft text-accent flex items-center justify-center text-xl font-semibold ring-2 ring-accent-tint shrink-0">
+                    {{ user.profile.initials }}
+                </div>
+            {% endif %}
+            <div class="min-w-0">
+                <h1 class="text-xl font-bold text-foreground truncate">{{ user.profile.display_name }}</h1>
+                <p class="text-sm text-foreground/55 truncate">{{ user.email|default:"No email set" }}</p>
+            </div>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <h2 class="text-sm font-semibold text-foreground/70 uppercase tracking-wide mb-3">Account details</h2>
+            <div class="grid sm:grid-cols-2 gap-x-3">
+                {% include 'accounts/_field.html' with field=user_form.first_name %}
+                {% include 'accounts/_field.html' with field=user_form.last_name %}
+            </div>
+            {% include 'accounts/_field.html' with field=user_form.email %}
+
+            <h2 class="text-sm font-semibold text-foreground/70 uppercase tracking-wide mb-3 mt-6">Profile</h2>
+            {% include 'accounts/_field.html' with field=profile_form.avatar %}
+            <div class="grid sm:grid-cols-2 gap-x-3">
+                {% include 'accounts/_field.html' with field=profile_form.phone_number %}
+                {% include 'accounts/_field.html' with field=profile_form.date_of_birth %}
+            </div>
+
+            <div class="flex items-center gap-3 mt-4">
+                <button type="submit" class="bg-accent text-white font-medium text-sm px-6 py-2.5 rounded-pill hover:bg-accent-hover transition">
+                    Save changes
+                </button>
+                <a href="{% url 'frontend:dashboard' %}" class="text-sm font-medium text-foreground/60 hover:text-foreground">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <form method="post" action="{% url 'accounts:logout' %}" class="bg-background rounded-card shadow-card p-6 flex items-center justify-between gap-4">
+        {% csrf_token %}
+        <div>
+            <div class="font-semibold text-sm text-foreground">Sign out</div>
+            <p class="text-xs text-foreground/55 mt-0.5">End your session on this device.</p>
+        </div>
+        <button type="submit" class="text-sm font-medium text-danger border border-danger/25 px-5 py-2 rounded-pill hover:bg-danger hover:text-white transition shrink-0">
+            Log out
+        </button>
+    </form>
+
+</div>
+{% endblock %}

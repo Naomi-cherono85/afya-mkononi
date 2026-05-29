@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'apps.chatbot',
     'apps.appointments',
     'apps.reminders',
+    'apps.health_tips',
     'apps.frontend',
 ]
 
@@ -71,6 +72,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'apps.core.context_processors.site_settings',
+                'apps.health_tips.context_processors.health_tip_of_the_day',
             ],
         },
     },
@@ -109,6 +112,18 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
     BASE_DIR / "theme" / "static",
 ]
+
+# User-uploaded media (avatars, health-tip images).
+# NOTE: served by Django only in DEBUG (see afya_mkononi/urls.py). In production
+# this should be backed by object storage (e.g. S3) — WhiteNoise serves static
+# files only, not media.
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / "media"
+
+# Authentication redirects
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'frontend:dashboard'
+LOGOUT_REDIRECT_URL = 'accounts:login'
 
 STORAGES = {
     "default": {

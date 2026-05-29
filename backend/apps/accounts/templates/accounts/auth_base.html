@@ -1,0 +1,55 @@
+{% load static tailwind_tags %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Afya Mkononi{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    {% tailwind_css %}
+</head>
+<body class="min-h-screen bg-muted text-foreground font-sans antialiased">
+
+    <div class="min-h-screen flex flex-col items-center justify-center px-4 py-10">
+
+        <div class="w-full max-w-md">
+
+            <a href="{% url 'frontend:about' %}" class="flex items-center justify-center gap-2.5 mb-8">
+                <div class="w-11 h-11 rounded-soft bg-accent-soft flex items-center justify-center shrink-0">
+                    <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"/>
+                    </svg>
+                </div>
+                <span class="text-xl font-bold text-foreground">Afya Mkononi</span>
+            </a>
+
+            {% if messages %}
+                <div class="flex flex-col gap-2 mb-5">
+                    {% for message in messages %}
+                        <div class="text-sm px-4 py-3 rounded-soft border
+                            {% if message.tags == 'error' %}bg-danger-soft border-danger/20 text-danger
+                            {% elif message.tags == 'success' %}bg-accent-soft border-accent-tint text-deep-green
+                            {% else %}bg-background border-border text-foreground{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="bg-background rounded-card shadow-card p-7 sm:p-9">
+                {% block card %}{% endblock %}
+            </div>
+
+            <p class="text-center text-xs text-foreground/50 mt-6 leading-relaxed">
+                Afya Mkononi provides general health information only and does<br class="hidden sm:block">
+                not replace professional medical care.
+            </p>
+
+        </div>
+    </div>
+
+</body>
+</html>

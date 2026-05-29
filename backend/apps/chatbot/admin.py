@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from .models import ChatMessage, ChatSession
+from .models import Conversation, Message
 
 
-class ChatMessageInline(admin.TabularInline):
-    model = ChatMessage
+class MessageInline(admin.TabularInline):
+    model = Message
     extra = 0
     can_delete = False
     readonly_fields = [
@@ -18,10 +18,10 @@ class ChatMessageInline(admin.TabularInline):
         return False
 
 
-@admin.register(ChatSession)
-class ChatSessionAdmin(admin.ModelAdmin):
-    list_display = ['session_id', 'user', 'started_at', 'last_active_at']
-    list_filter = ['started_at', 'last_active_at']
-    search_fields = ['session_id', 'user__username']
-    readonly_fields = ['session_id', 'started_at', 'last_active_at']
-    inlines = [ChatMessageInline]
+@admin.register(Conversation)
+class ConversationAdmin(admin.ModelAdmin):
+    list_display = ['display_title', 'user', 'needs_human', 'created_at', 'updated_at']
+    list_filter = ['needs_human', 'created_at', 'updated_at']
+    search_fields = ['id', 'title', 'user__username']
+    readonly_fields = ['id', 'created_at', 'updated_at']
+    inlines = [MessageInline]

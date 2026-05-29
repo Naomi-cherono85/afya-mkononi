@@ -8,13 +8,19 @@
     const sendSpinner = sendBtn ? sendBtn.querySelector('[data-send-spinner]') : null;
     const thread = document.getElementById('chat-thread');
     const intro = document.getElementById('chat-intro');
+    const loading = document.getElementById('chat-loading');
+    const titleEl = document.getElementById('chat-title');
     const userTpl = document.getElementById('chat-user-bubble');
     const aiTpl = document.getElementById('chat-ai-bubble');
     const errTpl = document.getElementById('chat-error-bubble');
     const typingTpl = document.getElementById('chat-typing-bubble');
+    const convItemTpl = document.getElementById('conversation-item-template');
+    const convPanel = document.getElementById('conversation-panel');
+    const convList = document.getElementById('conversation-list');
+    const convEmpty = document.getElementById('conversation-empty');
     const csrfInput = document.querySelector('input[name=csrfmiddlewaretoken]');
 
-    let sessionId = null;
+    let conversationId = null;
     let pending = false;
 
     const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
@@ -51,10 +57,14 @@
         }).join('');
     };
 
-    const hideIntro = () => {
-        if (intro && !intro.classList.contains('hidden')) {
-            intro.classList.add('hidden');
-        }
+    const hideIntro = () => intro && intro.classList.add('hidden');
+    const showIntro = () => intro && intro.classList.remove('hidden');
+
+    // Remove all rendered bubbles, keeping the intro and loading placeholders.
+    const clearThread = () => {
+        Array.from(thread.children).forEach((child) => {
+            if (child !== intro && child !== loading) child.remove();
+        });
     };
 
     const appendUser = (text) => {
@@ -98,6 +108,112 @@
         }
     };
 
+    // ---- Conversation history sidebar ----
+
+    const titleSpan = (item) => item.querySelector('[data-title]') || item.querySelector('span');
+
+    const setActive = (id) => {
+        convList.querySelectorAll('.conversation-item').forEach((item) => {
+            const isActive = item.dataset.conversationId === id;
+            item.classList.toggle('bg-accent-soft', isActive);
+            titleSpan(item).classList.toggle('text-accent', isActive);
+        });
+    };
+
+    const formatNow = () => {
+        const d = new Date();
+        return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short' }) +
+            ', ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    };
+
+    // Insert a new conversation item at the top, or update an existing one.
+    const upsertConversation = (id, title) => {
+        if (convEmpty) convEmpty.classList.add('hidden');
+        let item = convList.querySelector(`[data-conversation-id="${id}"]`);
+        if (!item) {
+            item = convItemTpl.content.firstElementChild.cloneNode(true);
+            item.dataset.conversationId = id;
+            bindConversationItem(item);
+        } else {
+            item.remove();
+        }
+        titleSpan(item).textContent = title;
+        const timeSpan = item.querySelector('[data-time]') || item.querySelectorAll('span')[1];
+        if (timeSpan) timeSpan.textContent = formatNow();
+        convList.prepend(item);
+        setActive(id);
+    };
+
+    const openConversation = async (id) => {
+        if (pending || id === conversationId) {
+            closeMobilePanel();
+            return;
+        }
+        closeMobilePanel();
+        clearThread();
+        hideIntro();
+        loading.classList.remove('hidden');
+        loading.classList.add('flex');
+        thread.scrollTop = 0;
+
+        try {
+            const res = await fetch(`/api/chat/conversations/${id}/`, {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin',
+            });
+            loading.classList.add('hidden');
+            loading.classList.remove('flex');
+
+            if (!res.ok) {
+                appendError('Could not load this conversation. Please try again.');
+                return;
+            }
+            const data = await res.json();
+            conversationId = data.id;
+            if (titleEl) titleEl.textContent = data.display_title || 'Chat Assistant';
+            clearThread();
+            (data.messages || []).forEach((m) => {
+                if (m.sender_type === 'USER') appendUser(m.message_content);
+                else if (m.sender_type === 'AI') appendAi(m.message_content);
+            });
+            setActive(id);
+        } catch (err) {
+            loading.classList.add('hidden');
+            loading.classList.remove('flex');
+            appendError('Could not load this conversation. Please try again.');
+        }
+    };
+
+    const bindConversationItem = (item) => {
+        item.addEventListener('click', () => openConversation(item.dataset.conversationId));
+    };
+
+    convList.querySelectorAll('.conversation-item').forEach(bindConversationItem);
+
+    const startNewChat = () => {
+        conversationId = null;
+        clearThread();
+        showIntro();
+        if (titleEl) titleEl.textContent = 'Chat Assistant';
+        setActive(null);
+        closeMobilePanel();
+        input.focus();
+    };
+
+    // ---- Mobile history panel toggle ----
+
+    const openMobilePanel = () => convPanel && convPanel.classList.add('!flex');
+    const closeMobilePanel = () => convPanel && convPanel.classList.remove('!flex');
+    const toggleMobilePanel = () => convPanel && convPanel.classList.toggle('!flex');
+
+    const historyToggle = document.getElementById('history-toggle');
+    if (historyToggle) historyToggle.addEventListener('click', toggleMobilePanel);
+
+    document.getElementById('new-chat-btn')?.addEventListener('click', startNewChat);
+    document.getElementById('new-chat-btn-mobile')?.addEventListener('click', startNewChat);
+
+    // ---- Sending ----
+
     const FRIENDLY_ERROR = 'Sorry, the assistant is temporarily unavailable. Please try again in a moment.';
 
     const sendMessage = async (message) => {
@@ -122,7 +238,7 @@
                 credentials: 'same-origin',
                 body: JSON.stringify({
                     message: trimmed,
-                    ...(sessionId ? { session_id: sessionId } : {}),
+                    ...(conversationId ? { conversation_id: conversationId } : {}),
                 }),
             });
 
@@ -130,8 +246,10 @@
 
             if (res.ok) {
                 const data = await res.json();
-                if (data.session_id) sessionId = data.session_id;
+                if (data.conversation_id) conversationId = data.conversation_id;
+                if (data.title && titleEl) titleEl.textContent = data.title;
                 appendAi(data.reply || '(no reply)');
+                if (conversationId) upsertConversation(conversationId, data.title || 'New conversation');
             } else {
                 let detail = FRIENDLY_ERROR;
                 if (res.status === 400) {
@@ -140,9 +258,7 @@
                         if (body.message) {
                             detail = Array.isArray(body.message) ? body.message.join(' ') : body.message;
                         }
-                    } catch (_) {
-                        /* ignore body parse errors */
-                    }
+                    } catch (_) { /* ignore body parse errors */ }
                 }
                 appendError(detail);
             }

@@ -1,53 +1,83 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .models import ChatMessage, ChatSession
-from .serializers import ChatRequestSerializer, ChatSessionSerializer
+from .models import Conversation, Message
+from .serializers import (
+    ChatRequestSerializer,
+    ConversationListSerializer,
+    ConversationSerializer,
+)
 from .services import ai_service
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def chat(request):
+    """Send a message; create or continue the user's conversation."""
     payload = ChatRequestSerializer(data=request.data)
     payload.is_valid(raise_exception=True)
 
     user_message = payload.validated_data['message']
-    session_id = payload.validated_data.get('session_id')
-    if session_id:
-        session = get_object_or_404(ChatSession, session_id=session_id)
-    else:
-        session = ChatSession.objects.create()
+    conversation_id = payload.validated_data.get('conversation_id')
 
-    ChatMessage.objects.create(
-        session=session,
-        sender_type=ChatMessage.SenderType.USER,
+    if conversation_id:
+        # Ownership-scoped: a user can only post into their own conversation.
+        conversation = get_object_or_404(
+            Conversation, id=conversation_id, user=request.user,
+        )
+    else:
+        conversation = Conversation.objects.create(user=request.user)
+
+    Message.objects.create(
+        conversation=conversation,
+        sender_type=Message.SenderType.USER,
         message_content=user_message,
-        safety_category=ChatMessage.SafetyCategory.NORMAL,
+        safety_category=Message.SafetyCategory.NORMAL,
     )
 
-    reply_text, safety_category = ai_service.generate_reply(session, user_message)
+    # Title the thread from its first user message (ChatGPT-style).
+    conversation.set_title_from(user_message)
 
-    ChatMessage.objects.create(
-        session=session,
-        sender_type=ChatMessage.SenderType.AI,
+    reply_text, safety_category = ai_service.generate_reply(conversation, user_message)
+
+    Message.objects.create(
+        conversation=conversation,
+        sender_type=Message.SenderType.AI,
         message_content=reply_text,
         safety_category=safety_category,
     )
 
-    session.save(update_fields=['last_active_at'])
+    # Bump updated_at so the conversation rises to the top of the history list.
+    conversation.save(update_fields=['updated_at'])
 
     return Response(
-        {'session_id': str(session.session_id), 'reply': reply_text},
+        {
+            'conversation_id': str(conversation.id),
+            'title': conversation.display_title,
+            'reply': reply_text,
+        },
         status=status.HTTP_200_OK,
     )
 
 
 @api_view(['GET'])
-def session_detail(request, session_id):
-    session = get_object_or_404(
-        ChatSession.objects.prefetch_related('messages'),
-        session_id=session_id,
+@permission_classes([IsAuthenticated])
+def conversation_list(request):
+    """List the signed-in user's conversations for the history sidebar."""
+    conversations = request.user.conversations.all()
+    return Response(ConversationListSerializer(conversations, many=True).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def conversation_detail(request, conversation_id):
+    """Return one conversation with its messages, scoped to the owner."""
+    conversation = get_object_or_404(
+        Conversation.objects.prefetch_related('messages'),
+        id=conversation_id,
+        user=request.user,
     )
-    return Response(ChatSessionSerializer(session).data)
+    return Response(ConversationSerializer(conversation).data)

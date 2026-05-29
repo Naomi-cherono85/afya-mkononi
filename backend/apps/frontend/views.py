@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.utils import timezone
 
@@ -16,6 +17,7 @@ def _greeting_for_hour(hour):
     return 'Good evening'
 
 
+@login_required
 def dashboard(request):
     now = timezone.localtime()
     today = now.date()
@@ -48,6 +50,7 @@ def dashboard(request):
     return render(request, 'frontend/pages/dashboard.html', context)
 
 
+@login_required
 def appointment_book(request):
     recent_appointments = Appointment.objects.all()[:5]
     return render(request, 'frontend/pages/appointment_book.html', {
@@ -55,6 +58,7 @@ def appointment_book(request):
     })
 
 
+@login_required
 def reminder_create(request):
     recent_reminders = Reminder.objects.all()[:5]
     return render(request, 'frontend/pages/reminder_create.html', {
@@ -63,27 +67,12 @@ def reminder_create(request):
     })
 
 
+@login_required
 def chat(request):
-    now = timezone.localtime()
-    today = now.date()
-
-    upcoming_appointment = (
-        Appointment.objects
-        .filter(
-            preferred_date__gte=today,
-            status__in=[Appointment.Status.PENDING, Appointment.Status.CONFIRMED],
-        )
-        .order_by('preferred_date', 'preferred_time')
-        .first()
-    )
-
-    todays_reminders = Reminder.objects.filter(
-        scheduled_for__date=today,
-    ).order_by('scheduled_for')[:5]
-
+    # The user's conversations power the ChatGPT-style history panel.
+    conversations = request.user.conversations.all()[:50]
     return render(request, 'frontend/pages/chat.html', {
-        'upcoming_appointment': upcoming_appointment,
-        'todays_reminders': todays_reminders,
+        'conversations': conversations,
     })
 
 

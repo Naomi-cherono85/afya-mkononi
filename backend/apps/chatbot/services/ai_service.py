@@ -1,8 +1,8 @@
 """Anthropic Claude integration for the Afya Mkononi chatbot.
 
 All Anthropic SDK usage is isolated to this module. Views call
-`generate_reply(session, user_message)` and receive a (reply, safety_category)
-tuple; they never import `anthropic` directly.
+`generate_reply(conversation, user_message)` and receive a (reply,
+safety_category) tuple; they never import `anthropic` directly.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from typing import Tuple
 import anthropic
 from django.conf import settings
 
-from ..models import ChatMessage, ChatSession
+from ..models import Conversation, Message
 
 logger = logging.getLogger(__name__)
 
@@ -56,33 +56,33 @@ EMERGENCY_KEYWORDS = (
 
 
 def _classify_safety(user_message: str, ai_reply: str) -> str:
-    """Best-effort safety tag for the persisted ChatMessage.
+    """Best-effort safety tag for the persisted Message.
 
     Keyword-based — intentionally simple. The real guardrails live in the
     system prompt; this just labels rows so the team can audit later.
     """
     haystack = f"{user_message}\n{ai_reply}".lower()
     if any(kw in haystack for kw in EMERGENCY_KEYWORDS):
-        return ChatMessage.SafetyCategory.EMERGENCY
-    return ChatMessage.SafetyCategory.NORMAL
+        return Message.SafetyCategory.EMERGENCY
+    return Message.SafetyCategory.NORMAL
 
 
-def _build_history(session: ChatSession, limit: int) -> list[dict]:
-    """Pull recent USER/AI turns from the session as Anthropic message dicts.
+def _build_history(conversation: Conversation, limit: int) -> list[dict]:
+    """Pull recent USER/AI turns from the conversation as Anthropic message dicts.
 
     SYSTEM-sender rows are skipped — system context lives in the system prompt,
     not the message history.
     """
     qs = (
-        session.messages
-        .filter(sender_type__in=[ChatMessage.SenderType.USER, ChatMessage.SenderType.AI])
+        conversation.messages
+        .filter(sender_type__in=[Message.SenderType.USER, Message.SenderType.AI])
         .order_by('-created_at')[:limit]
     )
     recent = list(reversed(list(qs)))
 
     role_map = {
-        ChatMessage.SenderType.USER: 'user',
-        ChatMessage.SenderType.AI: 'assistant',
+        Message.SenderType.USER: 'user',
+        Message.SenderType.AI: 'assistant',
     }
     messages = []
     for msg in recent:
@@ -93,8 +93,8 @@ def _build_history(session: ChatSession, limit: int) -> list[dict]:
     return messages
 
 
-def generate_reply(session: ChatSession, user_message: str) -> Tuple[str, str]:
-    """Generate a Claude reply for the given session and new user message.
+def generate_reply(conversation: Conversation, user_message: str) -> Tuple[str, str]:
+    """Generate a Claude reply for the given conversation and new user message.
 
     Returns (reply_text, safety_category). On any API failure returns a safe
     fallback so the chat flow never breaks.
@@ -105,9 +105,9 @@ def generate_reply(session: ChatSession, user_message: str) -> Tuple[str, str]:
     api_key = settings.ANTHROPIC_API_KEY
     if not api_key:
         logger.error('ANTHROPIC_API_KEY is empty; falling back.')
-        return FALLBACK_REPLY, ChatMessage.SafetyCategory.NORMAL
+        return FALLBACK_REPLY, Message.SafetyCategory.NORMAL
 
-    history = _build_history(session, settings.ANTHROPIC_HISTORY_TURNS)
+    history = _build_history(conversation, settings.ANTHROPIC_HISTORY_TURNS)
     history.append({'role': 'user', 'content': user_message})
 
     try:
@@ -120,13 +120,13 @@ def generate_reply(session: ChatSession, user_message: str) -> Tuple[str, str]:
         )
     except anthropic.APIStatusError as exc:
         logger.exception('Anthropic API status error: %s', exc.status_code)
-        return FALLBACK_REPLY, ChatMessage.SafetyCategory.NORMAL
+        return FALLBACK_REPLY, Message.SafetyCategory.NORMAL
     except anthropic.APIConnectionError:
         logger.exception('Anthropic API connection error')
-        return FALLBACK_REPLY, ChatMessage.SafetyCategory.NORMAL
+        return FALLBACK_REPLY, Message.SafetyCategory.NORMAL
     except Exception:
         logger.exception('Unexpected error calling Anthropic')
-        return FALLBACK_REPLY, ChatMessage.SafetyCategory.NORMAL
+        return FALLBACK_REPLY, Message.SafetyCategory.NORMAL
 
     reply_text = next(
         (block.text for block in response.content if block.type == 'text'),
@@ -135,10 +135,10 @@ def generate_reply(session: ChatSession, user_message: str) -> Tuple[str, str]:
 
     if not reply_text:
         logger.warning('Anthropic returned no text content; stop_reason=%s', response.stop_reason)
-        return FALLBACK_REPLY, ChatMessage.SafetyCategory.NORMAL
+        return FALLBACK_REPLY, Message.SafetyCategory.NORMAL
 
     if response.stop_reason == 'refusal':
-        return reply_text, ChatMessage.SafetyCategory.REFUSED
+        return reply_text, Message.SafetyCategory.REFUSED
 
     safety = _classify_safety(user_message, reply_text)
     return reply_text, safety
