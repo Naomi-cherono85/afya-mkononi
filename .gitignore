@@ -22,3 +22,9 @@ staticfiles/
 
 docs/
 Documentation/
+
+*.log
+*.pid
+desktop.ini
+verify_shots/
+images/
