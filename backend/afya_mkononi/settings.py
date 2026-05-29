@@ -125,6 +125,26 @@ LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'frontend:dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:login'
 
+# Email (used by the password-reset flow).
+# Default is the console backend: emails (incl. the reset link) are printed to
+# the runserver terminal — handy for local dev with no SMTP server. In
+# production set EMAIL_BACKEND to the SMTP backend and fill in the EMAIL_* vars.
+EMAIL_BACKEND = config(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend',
+)
+DEFAULT_FROM_EMAIL = config(
+    'DEFAULT_FROM_EMAIL',
+    default='Afya Mkononi <no-reply@afyamkononi.local>',
+)
+EMAIL_HOST = config('EMAIL_HOST', default='')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+# How long the reset link stays valid (seconds). 3 days here.
+PASSWORD_RESET_TIMEOUT = config('PASSWORD_RESET_TIMEOUT', default=259200, cast=int)
+
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",

@@ -1,6 +1,11 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    PasswordResetForm,
+    SetPasswordForm,
+    UserCreationForm,
+)
 
 from .models import Profile
 
@@ -34,6 +39,25 @@ class BrandAuthenticationForm(AuthenticationForm):
         _style(self.fields, {
             'username': 'Your username',
             'password': 'Your password',
+        })
+
+
+class BrandPasswordResetForm(PasswordResetForm):
+    """'Forgot password' email-entry form, brand-styled."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _style(self.fields, {'email': 'you@example.com'})
+
+
+class BrandSetPasswordForm(SetPasswordForm):
+    """The 'choose a new password' form shown after clicking the email link."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _style(self.fields, {
+            'new_password1': 'New password',
+            'new_password2': 'Confirm new password',
         })
 
 

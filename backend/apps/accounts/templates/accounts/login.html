@@ -19,6 +19,12 @@
         {% include 'accounts/_field.html' with field=form.username %}
         {% include 'accounts/_field.html' with field=form.password %}
 
+        <div class="flex justify-end -mt-2 mb-4">
+            <a href="{% url 'accounts:password_reset' %}" class="text-sm font-medium text-accent hover:underline">
+                Forgot password?
+            </a>
+        </div>
+
         <button type="submit" class="w-full bg-accent text-white font-medium text-sm py-3 rounded-pill hover:bg-accent-hover transition mt-2">
             Sign in
         </button>
