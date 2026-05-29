@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'tailwind',
     'theme',
     'django_browser_reload',
+    'anymail',
 
     # Local apps
     'apps.core',
@@ -126,9 +127,15 @@ LOGIN_REDIRECT_URL = 'frontend:dashboard'
 LOGOUT_REDIRECT_URL = 'accounts:login'
 
 # Email (used by the password-reset flow).
-# Default is the console backend: emails (incl. the reset link) are printed to
-# the runserver terminal — handy for local dev with no SMTP server. In
-# production set EMAIL_BACKEND to the SMTP backend and fill in the EMAIL_* vars.
+#
+# Local dev defaults to the console backend: emails (incl. the reset link) are
+# printed to the runserver terminal — no provider needed.
+#
+# Production (Render) blocks outbound SMTP ports, so we send via Brevo's HTTPS
+# API using django-anymail. On Render, set:
+#   EMAIL_BACKEND=anymail.backends.brevo.EmailBackend
+#   BREVO_API_KEY=<your Brevo API key>
+#   DEFAULT_FROM_EMAIL=Afya Mkononi <your-verified-sender@example.com>
 EMAIL_BACKEND = config(
     'EMAIL_BACKEND',
     default='django.core.mail.backends.console.EmailBackend',
@@ -137,11 +144,20 @@ DEFAULT_FROM_EMAIL = config(
     'DEFAULT_FROM_EMAIL',
     default='Afya Mkononi <no-reply@afyamkononi.local>',
 )
+
+# Anymail / Brevo (transactional email over HTTPS — works where SMTP is blocked).
+ANYMAIL = {
+    'BREVO_API_KEY': config('BREVO_API_KEY', default=''),
+}
+
+# Optional SMTP settings (only used if EMAIL_BACKEND is set to the SMTP backend).
 EMAIL_HOST = config('EMAIL_HOST', default='')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+# Fail fast instead of hanging a worker if a mail server is unreachable.
+EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=10, cast=int)
 # How long the reset link stays valid (seconds). 3 days here.
 PASSWORD_RESET_TIMEOUT = config('PASSWORD_RESET_TIMEOUT', default=259200, cast=int)
 
