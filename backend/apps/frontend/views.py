@@ -3,6 +3,7 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from apps.appointments.models import Appointment
+from apps.core.greetings import pick_greeting
 from apps.reminders.models import Reminder
 
 
@@ -16,18 +17,16 @@ def landing(request):
     return render(request, 'frontend/pages/landing.html')
 
 
-def _greeting_for_hour(hour):
-    if hour < 12:
-        return 'Good morning'
-    if hour < 17:
-        return 'Good afternoon'
-    return 'Good evening'
-
-
 @login_required
 def dashboard(request):
     now = timezone.localtime()
     today = now.date()
+
+    # Set at login by the user_logged_in signal; fall back for older sessions.
+    greeting = request.session.get('greeting')
+    if not greeting:
+        greeting = pick_greeting()
+        request.session['greeting'] = greeting
 
     upcoming_appointment = (
         Appointment.objects
@@ -47,7 +46,7 @@ def dashboard(request):
     recent_reminders = Reminder.objects.all()[:3]
 
     context = {
-        'greeting': _greeting_for_hour(now.hour),
+        'greeting': greeting,
         'today': today,
         'upcoming_appointment': upcoming_appointment,
         'todays_reminders': todays_reminders,
