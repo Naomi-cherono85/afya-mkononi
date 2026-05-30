@@ -3,22 +3,22 @@
 {% block title %}Dashboard — Afya Mkononi{% endblock %}
 
 {% block content %}
-<div class="grid xl:grid-cols-[1fr_320px] gap-6">
+<div class="grid xl:grid-cols-[1fr_320px] gap-5">
 
-    <section class="flex flex-col gap-6 min-w-0">
+    <section class="flex flex-col gap-4 min-w-0">
 
-        <div class="bg-background rounded-card shadow-card p-8 relative overflow-hidden">
+        <div class="bg-background rounded-card shadow-card p-6 relative overflow-hidden">
             <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-accent-soft/70"></div>
             <div class="absolute top-12 -right-8 w-24 h-24 rounded-full bg-accent-tint/40"></div>
 
             <div class="relative">
                 <div class="flex items-center gap-2 mb-1">
-                    <h1 class="text-3xl font-bold text-foreground">{{ greeting }}, {{ user.get_short_name|default:user.username }}</h1>
-                    <span class="text-3xl">👋</span>
+                    <h1 class="text-2xl font-bold text-foreground">{{ greeting }}, {{ user.get_short_name|default:user.username }}</h1>
+                    <span class="text-2xl">👋</span>
                 </div>
                 <p class="text-foreground/60">How can Afya Mkononi help you today?</p>
 
-                <div class="mt-7 grid sm:grid-cols-2 gap-3">
+                <div class="mt-5 grid sm:grid-cols-2 gap-3">
                     <a href="{% url 'frontend:chat' %}" class="flex items-center gap-3 p-4 rounded-soft border border-border bg-background hover:border-accent hover:bg-accent-soft/50 transition group">
                         <div class="w-11 h-11 rounded-soft bg-accent-soft group-hover:bg-accent-tint flex items-center justify-center shrink-0 transition">
                             <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.068.157 2.148.279 3.238.364.466.037.893.281 1.153.671L12 21l2.652-3.978c.26-.39.687-.634 1.153-.67 1.09-.086 2.17-.208 3.238-.365 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>
@@ -62,8 +62,8 @@
             </div>
         </div>
 
-        <div class="bg-background rounded-card shadow-card p-6">
-            <div class="flex items-center justify-between mb-5">
+        <div class="bg-background rounded-card shadow-card p-5">
+            <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <div class="w-7 h-7 rounded-soft bg-accent-soft flex items-center justify-center">
                         <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
@@ -100,7 +100,7 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <div class="text-center py-6">
+                <div class="text-center py-5">
                     <div class="w-12 h-12 mx-auto rounded-full bg-accent-soft flex items-center justify-center mb-3">
                         <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
                     </div>
@@ -109,8 +109,8 @@
             {% endif %}
         </div>
 
-        <div class="bg-background rounded-card shadow-card p-6">
-            <div class="flex items-center justify-between mb-5">
+        <div class="bg-background rounded-card shadow-card p-5">
+            <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <div class="w-7 h-7 rounded-soft bg-accent-soft flex items-center justify-center">
                         <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
@@ -145,7 +145,7 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <div class="text-center py-6">
+                <div class="text-center py-5">
                     <div class="w-12 h-12 mx-auto rounded-full bg-accent-soft flex items-center justify-center mb-3">
                         <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
                     </div>
