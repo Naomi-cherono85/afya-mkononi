@@ -4,11 +4,11 @@
 {% block title %}Set a reminder — Afya Mkononi{% endblock %}
 
 {% block content %}
-<div class="grid xl:grid-cols-[1fr_320px] gap-6">
+<div class="grid xl:grid-cols-[1fr_320px] gap-5">
 
     <section class="min-w-0">
 
-        <div id="rem-form-card" class="bg-background rounded-card shadow-card p-8">
+        <div id="rem-form-card" class="bg-background rounded-card shadow-card p-6">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-11 h-11 rounded-soft bg-accent-soft flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
@@ -68,7 +68,7 @@
             </form>
         </div>
 
-        <div id="rem-success-card" class="hidden bg-background rounded-card shadow-card p-8">
+        <div id="rem-success-card" class="hidden bg-background rounded-card shadow-card p-6">
             <div class="flex items-start gap-4 mb-6">
                 <div class="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center shrink-0 ring-4 ring-accent-tint/40">
                     <svg class="w-7 h-7 text-accent" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -104,8 +104,8 @@
     </section>
 
     <aside class="flex flex-col gap-4">
-        <div class="bg-background rounded-card shadow-card p-6">
-            <div class="flex items-center gap-2 mb-4">
+        <div class="bg-background rounded-card shadow-card p-5">
+            <div class="flex items-center gap-2 mb-3">
                 <div class="w-7 h-7 rounded-soft bg-accent-soft flex items-center justify-center">
                     <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
                 </div>
@@ -130,7 +130,7 @@
                     {% endfor %}
                 </ul>
             {% else %}
-                <div class="bg-muted/40 rounded-soft p-5 text-center">
+                <div class="bg-muted/40 rounded-soft p-4 text-center">
                     <p class="text-xs text-foreground/60">No reminders yet.</p>
                 </div>
             {% endif %}

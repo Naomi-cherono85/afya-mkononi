@@ -3,10 +3,10 @@
 {% block title %}My Profile — Afya Mkononi{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto flex flex-col gap-6">
+<div class="max-w-2xl mx-auto flex flex-col gap-4">
 
-    <div class="bg-background rounded-card shadow-card p-6 sm:p-8">
-        <div class="flex items-center gap-4 mb-6">
+    <div class="bg-background rounded-card shadow-card p-5 sm:p-6">
+        <div class="flex items-center gap-4 mb-5">
             {% if user.profile.avatar %}
                 <img src="{{ user.profile.avatar.url }}" alt="{{ user.profile.display_name }}"
                      class="w-16 h-16 rounded-full object-cover ring-2 ring-accent-tint">
@@ -47,7 +47,7 @@
         </form>
     </div>
 
-    <form method="post" action="{% url 'accounts:logout' %}" class="bg-background rounded-card shadow-card p-6 flex items-center justify-between gap-4">
+    <form method="post" action="{% url 'accounts:logout' %}" class="bg-background rounded-card shadow-card p-5 flex items-center justify-between gap-4">
         {% csrf_token %}
         <div>
             <div class="font-semibold text-sm text-foreground">Sign out</div>
