@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.utils import timezone
 
 from apps.appointments.models import Appointment
@@ -7,6 +7,13 @@ from apps.reminders.models import Reminder
 
 
 REMINDER_TYPE_CHOICES = Reminder.ReminderType.choices
+
+
+def landing(request):
+    # Public marketing page. Signed-in users skip straight to their dashboard.
+    if request.user.is_authenticated:
+        return redirect('frontend:dashboard')
+    return render(request, 'frontend/pages/landing.html')
 
 
 def _greeting_for_hour(hour):

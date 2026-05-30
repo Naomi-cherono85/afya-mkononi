@@ -18,11 +18,7 @@
         <div class="w-full max-w-md">
 
             <a href="{% url 'accounts:login' %}" class="flex items-center justify-center gap-2.5 mb-8">
-                <div class="w-11 h-11 rounded-soft bg-accent-soft flex items-center justify-center shrink-0">
-                    <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z"/>
-                    </svg>
-                </div>
+                {% include 'frontend/partials/brand_logo.html' with box='w-11 h-11' %}
                 <span class="text-xl font-bold text-foreground">Afya Mkononi</span>
             </a>
 

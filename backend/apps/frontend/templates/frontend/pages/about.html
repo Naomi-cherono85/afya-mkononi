@@ -1,9 +1,10 @@
-{% extends 'frontend/base.html' %}
+{% extends 'frontend/public_base.html' %}
 
 {% block title %}About &amp; Help — Afya Mkononi{% endblock %}
 
 {% block content %}
-<div class="flex flex-col gap-6 max-w-[860px]">
+<div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-10 sm:py-12">
+<div class="flex flex-col gap-6 max-w-[860px] mx-auto">
 
     <section class="bg-background rounded-card shadow-card p-8 relative overflow-hidden">
         <div class="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-accent-soft/70"></div>
@@ -122,9 +123,8 @@
         </div>
     </section>
 
-</div>
-{% endblock %}
-
-{% block footer_strip %}
     {% include 'frontend/partials/feature_strip.html' %}
+
+</div>
+</div>
 {% endblock %}

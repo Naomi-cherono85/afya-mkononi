@@ -1,0 +1,166 @@
+{% extends 'frontend/public_base.html' %}
+
+{% block title %}Afya Mkononi — Your AI-powered health companion{% endblock %}
+
+{% block content %}
+
+{# ----- Hero ----- #}
+<section class="relative overflow-hidden">
+    <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-accent-soft/60 blur-3xl"></div>
+    <div class="absolute -bottom-32 -left-24 w-96 h-96 rounded-full bg-primary/5 blur-3xl"></div>
+
+    <div class="relative max-w-[1200px] mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-12 sm:pb-20 text-center">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-pill bg-accent-soft text-accent text-xs font-medium mb-6">
+            <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
+            AI-powered patient support
+        </div>
+
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-[1.1] max-w-3xl mx-auto">
+            Health guidance, <span class="text-primary">at your fingertips</span>
+        </h1>
+
+        <p class="mt-6 text-lg text-foreground/65 leading-relaxed max-w-2xl mx-auto">
+            Afya Mkononi helps you ask general health questions, book clinic appointments,
+            and stay on top of your medications — all from one calm, simple place.
+            It's here to support you, never to replace your doctor.
+        </p>
+
+        <div class="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a href="{% url 'accounts:register' %}"
+               class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-pill bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-card hover:shadow-card-hover w-full sm:w-auto">
+                Get started — it's free
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+            </a>
+            <a href="{% url 'accounts:login' %}"
+               class="inline-flex items-center justify-center px-6 py-3 rounded-pill bg-background text-foreground font-semibold border border-border hover:bg-muted transition w-full sm:w-auto">
+                Log in
+            </a>
+        </div>
+
+        <p class="mt-5 text-xs text-foreground/45">No diagnoses. No prescriptions. Just clear, general health information.</p>
+    </div>
+</section>
+
+{# ----- How it works ----- #}
+<section class="max-w-[1200px] mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <div class="text-center mb-10">
+        <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Three things, done well</h2>
+        <p class="mt-3 text-foreground/60 max-w-xl mx-auto">Everything you need for everyday health support, without the clutter.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-5">
+
+        <div class="bg-background rounded-card shadow-card p-7 border border-border hover:shadow-card-hover transition">
+            <div class="w-12 h-12 rounded-soft bg-accent-soft text-accent flex items-center justify-center mb-5">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10.5h8M8 14h5m-9 6 3.5-2h7.5a4 4 0 0 0 4-4V7a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v13z"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-foreground mb-2">Ask</h3>
+            <p class="text-sm text-foreground/65 leading-relaxed">
+                Chat with the assistant about general health topics — symptoms, prevention,
+                medication basics, and when it's time to see a clinician.
+            </p>
+        </div>
+
+        <div class="bg-background rounded-card shadow-card p-7 border border-border hover:shadow-card-hover transition">
+            <div class="w-12 h-12 rounded-soft bg-accent-soft text-accent flex items-center justify-center mb-5">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0V11.25A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-foreground mb-2">Book</h3>
+            <p class="text-sm text-foreground/65 leading-relaxed">
+                Schedule an appointment with your clinic. Pick a date and time, share the reason,
+                and the clinic takes it from there.
+            </p>
+        </div>
+
+        <div class="bg-background rounded-card shadow-card p-7 border border-border hover:shadow-card-hover transition">
+            <div class="w-12 h-12 rounded-soft bg-accent-soft text-accent flex items-center justify-center mb-5">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+            </div>
+            <h3 class="text-lg font-semibold text-foreground mb-2">Remind</h3>
+            <p class="text-sm text-foreground/65 leading-relaxed">
+                Set reminders for medications, follow-up visits, or anything else you don't want
+                to forget. We'll surface them at the right time.
+            </p>
+        </div>
+
+    </div>
+</section>
+
+{# ----- Safety / trust ----- #}
+<section class="bg-muted border-y border-border">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <div class="grid lg:grid-cols-[1fr_1.2fr] gap-8 lg:gap-12 items-center">
+
+            <div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-foreground">Built with safe boundaries</h2>
+                <p class="mt-3 text-foreground/65 leading-relaxed">
+                    Afya Mkononi is designed to support you responsibly. These limits are built into
+                    the assistant by design — so you always know where AI guidance ends and
+                    professional care begins.
+                </p>
+                <a href="{% url 'frontend:about' %}" class="inline-flex items-center gap-1.5 mt-5 text-sm font-semibold text-primary hover:text-primary-hover transition">
+                    Learn how it works
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                </a>
+            </div>
+
+            <ul class="space-y-3">
+                <li class="flex items-start gap-3 bg-background rounded-soft border border-border p-4">
+                    <div class="w-7 h-7 rounded-full bg-danger-soft text-danger flex items-center justify-center shrink-0 mt-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-sm text-foreground mb-0.5">No diagnoses</div>
+                        <p class="text-sm text-foreground/65 leading-relaxed">The assistant never tells you what condition you have — only a clinician can do that, in person.</p>
+                    </div>
+                </li>
+                <li class="flex items-start gap-3 bg-background rounded-soft border border-border p-4">
+                    <div class="w-7 h-7 rounded-full bg-danger-soft text-danger flex items-center justify-center shrink-0 mt-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-sm text-foreground mb-0.5">No prescriptions</div>
+                        <p class="text-sm text-foreground/65 leading-relaxed">It will never tell you to start, stop, or change a medication. Always check with a licensed provider.</p>
+                    </div>
+                </li>
+                <li class="flex items-start gap-3 bg-background rounded-soft border border-border p-4">
+                    <div class="w-7 h-7 rounded-full bg-danger-soft text-danger flex items-center justify-center shrink-0 mt-0.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                    </div>
+                    <div>
+                        <div class="font-semibold text-sm text-foreground mb-0.5">No replacement for care</div>
+                        <p class="text-sm text-foreground/65 leading-relaxed">General information only. If your situation is serious or unclear, talk to a clinician right away.</p>
+                    </div>
+                </li>
+            </ul>
+
+        </div>
+    </div>
+</section>
+
+{# ----- Closing CTA ----- #}
+<section class="max-w-[1200px] mx-auto px-4 sm:px-6 py-14 sm:py-20">
+    <div class="relative overflow-hidden rounded-card bg-primary text-white px-6 sm:px-12 py-12 sm:py-16 text-center shadow-card">
+        <div class="absolute -top-16 -right-16 w-72 h-72 rounded-full bg-white/10"></div>
+        <div class="absolute -bottom-20 -left-10 w-72 h-72 rounded-full bg-white/5"></div>
+        <div class="relative">
+            <h2 class="text-2xl sm:text-3xl font-bold">Ready to take charge of your health?</h2>
+            <p class="mt-3 text-white/85 max-w-xl mx-auto">
+                Create a free account and start asking, booking, and remembering in minutes.
+            </p>
+            <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a href="{% url 'accounts:register' %}"
+                   class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-pill bg-background text-primary font-semibold hover:bg-muted transition w-full sm:w-auto">
+                    Get started — it's free
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"/></svg>
+                </a>
+                <a href="{% url 'accounts:login' %}"
+                   class="inline-flex items-center justify-center px-6 py-3 rounded-pill bg-primary-hover text-white font-semibold border border-white/25 hover:bg-white/10 transition w-full sm:w-auto">
+                    I already have an account
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

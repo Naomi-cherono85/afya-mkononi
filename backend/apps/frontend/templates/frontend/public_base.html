@@ -1,0 +1,58 @@
+{% load static tailwind_tags %}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Afya Mkononi — AI-powered health companion{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Afya Mkononi is an AI-powered health assistant. Ask general health questions, book clinic appointments, and stay on top of your medications — all in one place.{% endblock %}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    {% tailwind_css %}
+</head>
+<body class="min-h-screen bg-background text-foreground font-sans antialiased flex flex-col">
+
+    <header class="sticky top-0 z-40 bg-background/85 backdrop-blur border-b border-border">
+        <div class="max-w-[1200px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+
+            <a href="{% url 'frontend:landing' %}" class="flex items-center gap-2.5 shrink-0">
+                {% include 'frontend/partials/brand_logo.html' with box='w-9 h-9' %}
+                <span class="text-lg font-bold text-foreground">Afya Mkononi</span>
+            </a>
+
+            <nav class="flex items-center gap-1 sm:gap-2">
+                <a href="{% url 'frontend:about' %}" class="hidden sm:inline-flex px-3 py-2 rounded-pill text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition">
+                    About
+                </a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'frontend:dashboard' %}" class="inline-flex px-4 py-2 rounded-pill text-sm font-semibold bg-primary text-white hover:bg-primary-hover transition">
+                        Go to dashboard
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="inline-flex px-3 py-2 rounded-pill text-sm font-medium text-foreground/70 hover:text-foreground hover:bg-muted transition">
+                        Log in
+                    </a>
+                    <a href="{% url 'accounts:register' %}" class="inline-flex px-4 py-2 rounded-pill text-sm font-semibold bg-primary text-white hover:bg-primary-hover transition shadow-sm">
+                        Get started
+                    </a>
+                {% endif %}
+            </nav>
+
+        </div>
+    </header>
+
+    <main class="flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="border-t border-border bg-muted">
+        <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8 text-center text-sm text-foreground/60">
+            <p class="mb-1">Afya Mkononi provides general health information only and does not replace professional medical care.</p>
+            <p>&copy; {% now "Y" %} Afya Mkononi. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
