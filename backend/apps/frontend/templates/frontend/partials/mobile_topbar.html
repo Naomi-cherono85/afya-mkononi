@@ -1,0 +1,24 @@
+{% comment %}
+Mobile-only top app bar (hidden at lg+). Logo + name on the left, profile
+avatar on the right. Full-bleed via negative margins so it spans the viewport
+edge to edge, and sticky so it stays put while content scrolls.
+{% endcomment %}
+<header class="lg:hidden sticky top-0 z-30 -mx-4 sm:-mx-6 -mt-4 sm:-mt-6 mb-4 px-4 sm:px-6 h-14 flex items-center justify-between gap-3 bg-background/90 backdrop-blur border-b border-border">
+
+    <a href="{% url 'frontend:dashboard' %}" class="flex items-center gap-2 min-w-0">
+        {% include 'frontend/partials/brand_logo.html' with box='w-8 h-8' %}
+        <span class="text-base font-bold text-foreground truncate">Afya Mkononi</span>
+    </a>
+
+    <a href="{% url 'accounts:profile' %}" class="shrink-0" aria-label="Your profile">
+        {% if user.profile.avatar %}
+            <img src="{{ user.profile.avatar.url }}" alt="{{ user.profile.display_name }}"
+                 class="w-9 h-9 rounded-full object-cover ring-2 ring-accent-tint">
+        {% else %}
+            <div class="w-9 h-9 rounded-full bg-accent-soft text-accent flex items-center justify-center text-sm font-semibold ring-2 ring-accent-tint">
+                {{ user.profile.initials }}
+            </div>
+        {% endif %}
+    </a>
+
+</header>

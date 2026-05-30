@@ -13,7 +13,9 @@
 </head>
 <body class="min-h-screen bg-muted text-foreground font-sans antialiased">
 
-    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 py-4 sm:py-6">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-24 lg:pb-6">
+
+        {% include 'frontend/partials/mobile_topbar.html' %}
 
         {% if messages %}
             <div class="flex flex-col gap-2 mb-4">
@@ -33,7 +35,7 @@
 
         <div class="grid lg:grid-cols-[260px_1fr] gap-4 lg:gap-6">
 
-            <aside class="self-start lg:sticky lg:top-6">
+            <aside class="hidden lg:block self-start lg:sticky lg:top-6">
                 {% include 'frontend/partials/sidebar_left.html' %}
             </aside>
 
@@ -50,6 +52,8 @@
             <p>&copy; {% now "Y" %} Afya Mkononi. All rights reserved.</p>
         </footer>
     </div>
+
+    {% include 'frontend/partials/mobile_bottom_nav.html' %}
 
     {% block scripts %}{% endblock %}
 </body>

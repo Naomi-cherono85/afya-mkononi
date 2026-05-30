@@ -1,0 +1,44 @@
+{% comment %}
+Mobile-only bottom tab bar (hidden at lg+). Five primary destinations, the
+standard mobile navigation pattern that replaces the desktop left sidebar.
+Active tab is derived from the resolved URL name. Includes iOS safe-area
+padding so it clears the home indicator.
+{% endcomment %}
+{% with active=request.resolver_match.url_name %}
+<nav class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-background border-t border-border pb-[env(safe-area-inset-bottom)]"
+     aria-label="Primary">
+    <div class="grid grid-cols-5 h-16 max-w-[1440px] mx-auto">
+
+        <a href="{% url 'frontend:dashboard' %}"
+           class="flex flex-col items-center justify-center gap-1 transition {% if active == 'dashboard' %}text-accent{% else %}text-foreground/55 hover:text-foreground{% endif %}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+            <span class="text-[10px] font-medium leading-none">Home</span>
+        </a>
+
+        <a href="{% url 'frontend:chat' %}"
+           class="flex flex-col items-center justify-center gap-1 transition {% if active == 'chat' %}text-accent{% else %}text-foreground/55 hover:text-foreground{% endif %}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.068.157 2.148.279 3.238.364.466.037.893.281 1.153.671L12 21l2.652-3.978c.26-.39.687-.634 1.153-.67 1.09-.086 2.17-.208 3.238-.365 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>
+            <span class="text-[10px] font-medium leading-none">Chat</span>
+        </a>
+
+        <a href="{% url 'frontend:appointment-book' %}"
+           class="flex flex-col items-center justify-center gap-1 transition {% if active == 'appointment-book' %}text-accent{% else %}text-foreground/55 hover:text-foreground{% endif %}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+            <span class="text-[10px] font-medium leading-none">Appointments</span>
+        </a>
+
+        <a href="{% url 'frontend:reminder-create' %}"
+           class="flex flex-col items-center justify-center gap-1 transition {% if active == 'reminder-create' %}text-accent{% else %}text-foreground/55 hover:text-foreground{% endif %}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+            <span class="text-[10px] font-medium leading-none">Reminders</span>
+        </a>
+
+        <a href="{% url 'accounts:profile' %}"
+           class="flex flex-col items-center justify-center gap-1 transition {% if active == 'profile' %}text-accent{% else %}text-foreground/55 hover:text-foreground{% endif %}">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/></svg>
+            <span class="text-[10px] font-medium leading-none">Profile</span>
+        </a>
+
+    </div>
+</nav>
+{% endwith %}
