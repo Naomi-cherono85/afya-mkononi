@@ -1,4 +1,6 @@
 {# Human Support / WhatsApp card. Number comes from SiteSettings (admin-editable). #}
+{# Only rendered when a WhatsApp number is configured, so the card never shows a dead, button-less call-to-action. #}
+{% if site_settings.has_whatsapp %}
 <div class="bg-background rounded-card shadow-card p-5 hover:shadow-card-hover transition">
 
     <div class="flex items-center justify-center mb-3">
@@ -33,7 +35,6 @@
 
     {# wa.me links open the WhatsApp app on mobile (if installed) and WhatsApp Web on desktop. #}
     {# Number + prefill message are admin-editable via SiteSettings (apps.core). #}
-    {% if site_settings.has_whatsapp %}
         <a href="{{ site_settings.wa_link }}" target="_blank" rel="noopener noreferrer"
            class="flex items-center justify-center gap-2 w-full bg-accent text-white font-semibold text-sm py-3 rounded-pill hover:bg-accent-hover transition shadow-sm">
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -44,5 +45,5 @@
         {% if site_settings.support_hours %}
             <p class="text-xs text-foreground/45 text-center mt-3">{{ site_settings.support_hours }}</p>
         {% endif %}
-    {% endif %}
 </div>
+{% endif %}

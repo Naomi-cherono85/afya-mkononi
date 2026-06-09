@@ -1,3 +1,4 @@
+import re
 from urllib.parse import quote
 
 from django.core.exceptions import ValidationError
@@ -76,7 +77,8 @@ class SiteSettings(models.Model):
         """
         if not self.has_whatsapp:
             return ''
-        number = self.whatsapp_number.strip()
+        # wa.me requires digits only — strip a leading '+', spaces, dashes, parens, etc.
+        number = re.sub(r'\D', '', self.whatsapp_number)
         if self.whatsapp_prefill_message:
             return f'https://wa.me/{number}?text={quote(self.whatsapp_prefill_message)}'
         return f'https://wa.me/{number}'
