@@ -18,12 +18,13 @@ class HealthTip(models.Model):
         CHRONIC = 'CHRONIC', 'Chronic Conditions'
 
     title = models.CharField(max_length=120)
-    description = models.TextField(
+    content = models.TextField(
         help_text='The body of the tip. A sentence or two works best.',
     )
     image = models.ImageField(
         upload_to='health_tips/',
         blank=True,
+        null=True,
         help_text='Optional. A soft placeholder is shown when no image is set.',
     )
     category = models.CharField(
@@ -36,6 +37,7 @@ class HealthTip(models.Model):
         help_text='Only active tips appear in the daily rotation.',
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ['-created_at']

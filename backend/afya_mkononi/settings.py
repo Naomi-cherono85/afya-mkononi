@@ -178,3 +178,9 @@ ANTHROPIC_API_KEY = config('AI_API_KEY', default='')
 ANTHROPIC_MODEL = config('ANTHROPIC_MODEL', default='claude-haiku-4-5')
 ANTHROPIC_MAX_TOKENS = config('ANTHROPIC_MAX_TOKENS', default=1024, cast=int)
 ANTHROPIC_HISTORY_TURNS = config('ANTHROPIC_HISTORY_TURNS', default=10, cast=int)
+
+# Conversation title generation (apps.chatbot.services.title_service). Keyword
+# classification always runs first; the AI step only fires for messages it
+# can't confidently label, and falls back to a cleaned message on failure.
+CONVERSATION_TITLE_USE_AI = config('CONVERSATION_TITLE_USE_AI', default=True, cast=bool)
+CONVERSATION_TITLE_MAX_TOKENS = config('CONVERSATION_TITLE_MAX_TOKENS', default=20, cast=int)

@@ -9,16 +9,18 @@ class HealthTipAdmin(admin.ModelAdmin):
     list_display = ('title', 'category', 'is_active', 'created_at')
     list_filter = ('category', 'is_active', 'created_at')
     list_editable = ('is_active',)
-    search_fields = ('title', 'description')
-    readonly_fields = ('created_at', 'image_preview')
+    search_fields = ('title', 'content')
+    ordering = ('-created_at',)
+    readonly_fields = ('created_at', 'updated_at', 'image_preview')
     fields = (
         'title',
-        'description',
+        'content',
         'category',
         'image',
         'image_preview',
         'is_active',
         'created_at',
+        'updated_at',
     )
 
     @admin.display(description='Preview')

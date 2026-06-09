@@ -46,11 +46,22 @@ class Conversation(models.Model):
         return self.title or 'New conversation'
 
     def set_title_from(self, text, *, save=True):
-        """Derive a short title from the first user message, if not already set."""
+        """Generate a short, professional title from the first user message.
+
+        Only runs when the conversation has no title yet, so existing
+        conversations and manual renames are never overwritten. Title
+        generation lives in ``services.title_service`` (keyword classification
+        with an optional AI step and a graceful fallback).
+        """
         if self.title:
             return
-        cleaned = ' '.join(text.split())
-        self.title = (cleaned[:57] + '...') if len(cleaned) > 60 else cleaned
+        # Lazy import: services import models, so importing at module load
+        # would create a circular import.
+        from apps.chatbot.services.title_service import generate_conversation_title
+        title = generate_conversation_title(text)
+        if not title:
+            return
+        self.title = title[:120]
         if save:
             self.save(update_fields=['title'])
 

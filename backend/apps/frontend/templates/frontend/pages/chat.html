@@ -22,12 +22,18 @@
 
         <div id="conversation-list" class="flex flex-col gap-1 overflow-y-auto -mr-1 pr-1">
             {% for c in conversations %}
-                <button type="button"
-                        class="conversation-item group text-left w-full px-3 py-2.5 rounded-soft hover:bg-muted transition flex flex-col gap-0.5"
-                        data-conversation-id="{{ c.id }}">
-                    <span class="text-sm font-medium text-foreground truncate">{{ c.display_title }}</span>
-                    <span class="text-xs text-foreground/45">{{ c.updated_at|date:"j M, g:i A" }}</span>
-                </button>
+                <div class="conversation-item group relative flex items-center gap-1 w-full pl-3 pr-1 py-2 rounded-soft hover:bg-muted transition cursor-pointer"
+                     data-conversation-id="{{ c.id }}">
+                    <span class="flex flex-col gap-0.5 min-w-0 flex-1">
+                        <span class="text-sm font-medium text-foreground truncate" data-title>{{ c.display_title }}</span>
+                        <span class="text-xs text-foreground/45" data-time>{{ c.updated_at|date:"j M, g:i A" }}</span>
+                    </span>
+                    <button type="button"
+                            class="conv-rename opacity-0 group-hover:opacity-100 focus:opacity-100 transition w-7 h-7 rounded-md flex items-center justify-center text-foreground/45 hover:text-accent hover:bg-background shrink-0"
+                            aria-label="Rename conversation" title="Rename">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+                    </button>
+                </div>
             {% endfor %}
         </div>
 
@@ -193,10 +199,17 @@
         </template>
 
         <template id="conversation-item-template">
-            <button type="button" class="conversation-item group text-left w-full px-3 py-2.5 rounded-soft hover:bg-muted transition flex flex-col gap-0.5">
-                <span class="text-sm font-medium text-foreground truncate" data-title></span>
-                <span class="text-xs text-foreground/45" data-time></span>
-            </button>
+            <div class="conversation-item group relative flex items-center gap-1 w-full pl-3 pr-1 py-2 rounded-soft hover:bg-muted transition cursor-pointer">
+                <span class="flex flex-col gap-0.5 min-w-0 flex-1">
+                    <span class="text-sm font-medium text-foreground truncate" data-title></span>
+                    <span class="text-xs text-foreground/45" data-time></span>
+                </span>
+                <button type="button"
+                        class="conv-rename opacity-0 group-hover:opacity-100 focus:opacity-100 transition w-7 h-7 rounded-md flex items-center justify-center text-foreground/45 hover:text-accent hover:bg-background shrink-0"
+                        aria-label="Rename conversation" title="Rename">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125"/></svg>
+                </button>
+            </div>
         </template>
 
     </section>

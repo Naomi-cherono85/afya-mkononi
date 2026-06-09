@@ -184,8 +184,89 @@
         }
     };
 
+    // ---- Inline rename (ChatGPT-style pencil) ----
+
+    const commitRename = async (id, value, restore) => {
+        const trimmed = value.trim();
+        if (!trimmed) {
+            restore();
+            return;
+        }
+        try {
+            const res = await fetch(`/api/chat/conversations/${id}/`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRFToken': csrfInput.value,
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify({ title: trimmed }),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const newTitle = data.display_title || trimmed;
+                restore(newTitle);
+                if (id === conversationId && titleEl) titleEl.textContent = newTitle;
+            } else {
+                restore();
+            }
+        } catch (err) {
+            restore();
+        }
+    };
+
+    const startRename = (item) => {
+        const span = titleSpan(item);
+        if (!span || item.querySelector('input[data-rename]')) return;
+
+        const id = item.dataset.conversationId;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.dataset.rename = '1';
+        input.value = span.textContent;
+        input.maxLength = 120;
+        input.className = 'w-full text-sm font-medium text-foreground bg-background border border-accent rounded px-1.5 py-0.5 focus:outline-none focus:ring-2 focus:ring-accent/20';
+
+        span.classList.add('hidden');
+        span.parentNode.insertBefore(input, span);
+        input.focus();
+        input.select();
+
+        let done = false;
+        const restore = (newText) => {
+            if (done) return;
+            done = true;
+            if (newText) span.textContent = newText;
+            span.classList.remove('hidden');
+            input.remove();
+        };
+
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                commitRename(id, input.value, restore);
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                restore();
+            }
+        });
+        input.addEventListener('blur', () => commitRename(id, input.value, restore));
+    };
+
     const bindConversationItem = (item) => {
-        item.addEventListener('click', () => openConversation(item.dataset.conversationId));
+        item.addEventListener('click', (event) => {
+            // Clicks on the pencil or the rename input must not open the chat.
+            if (event.target.closest('.conv-rename') || event.target.closest('input[data-rename]')) return;
+            openConversation(item.dataset.conversationId);
+        });
+        const renameBtn = item.querySelector('.conv-rename');
+        if (renameBtn) {
+            renameBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                startRename(item);
+            });
+        }
     };
 
     convList.querySelectorAll('.conversation-item').forEach(bindConversationItem);

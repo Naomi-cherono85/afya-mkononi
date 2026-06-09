@@ -48,6 +48,20 @@ FALLBACK_REPLY = (
     "If this is a medical emergency, call 999 or 112, or go to the nearest hospital immediately."
 )
 
+TITLE_SYSTEM_PROMPT = """You name healthcare chat conversations.
+
+Given a user's first message, reply with a SHORT, professional title for the
+conversation — the kind that belongs in a healthcare app's history sidebar.
+
+RULES:
+- 2 to 5 words. Title Case.
+- Describe the topic, not the user. No first person, no questions, no quotes.
+- No diagnosis and no punctuation at the end.
+- Examples: "Headache Assessment", "Appointment Booking", "Medication Safety",
+  "Blood Pressure Guidance", "Malaria Information".
+
+Reply with ONLY the title text. Nothing else."""
+
 EMERGENCY_KEYWORDS = (
     'chest pain', 'cannot breathe', "can't breathe", 'difficulty breathing',
     'severe bleeding', 'unconscious', 'suicide', 'kill myself', 'overdose',
@@ -142,3 +156,45 @@ def generate_reply(conversation: Conversation, user_message: str) -> Tuple[str, 
 
     safety = _classify_safety(user_message, reply_text)
     return reply_text, safety
+
+
+def _tidy_title(raw: str) -> str:
+    """Clean an AI-generated title: strip quotes/punctuation, cap at 5 words."""
+    title = ' '.join(raw.split()).strip().strip('"\'').rstrip('.!?:;,')
+    words = title.split()
+    if len(words) > 5:
+        title = ' '.join(words[:5])
+    return title
+
+
+def generate_title(user_message: str) -> str | None:
+    """Ask Claude for a short conversation title. Returns ``None`` on any failure.
+
+    Intentionally cheap: a tiny prompt and a small token budget. The keyword
+    classifier in ``title_service`` handles most messages, so this only runs for
+    the harder-to-label ones.
+    """
+    api_key = settings.ANTHROPIC_API_KEY
+    if not api_key:
+        return None
+
+    max_tokens = getattr(settings, 'CONVERSATION_TITLE_MAX_TOKENS', 20)
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model=settings.ANTHROPIC_MODEL,
+            max_tokens=max_tokens,
+            system=TITLE_SYSTEM_PROMPT,
+            messages=[{'role': 'user', 'content': user_message[:500]}],
+        )
+    except Exception:
+        logger.exception('Anthropic title generation failed')
+        return None
+
+    raw = next(
+        (block.text for block in response.content if block.type == 'text'),
+        '',
+    ).strip()
+    if not raw:
+        return None
+    return _tidy_title(raw) or None

@@ -8,6 +8,7 @@ from .models import Conversation, Message
 from .serializers import (
     ChatRequestSerializer,
     ConversationListSerializer,
+    ConversationRenameSerializer,
     ConversationSerializer,
 )
 from .services import ai_service
@@ -71,13 +72,22 @@ def conversation_list(request):
     return Response(ConversationListSerializer(conversations, many=True).data)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PATCH'])
 @permission_classes([IsAuthenticated])
 def conversation_detail(request, conversation_id):
-    """Return one conversation with its messages, scoped to the owner."""
+    """Return one conversation (GET) or rename it (PATCH), scoped to the owner."""
     conversation = get_object_or_404(
         Conversation.objects.prefetch_related('messages'),
         id=conversation_id,
         user=request.user,
     )
+
+    if request.method == 'PATCH':
+        serializer = ConversationRenameSerializer(
+            conversation, data=request.data, partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(ConversationListSerializer(conversation).data)
+
     return Response(ConversationSerializer(conversation).data)

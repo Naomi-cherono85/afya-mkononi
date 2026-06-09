@@ -47,6 +47,20 @@ class ConversationListSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class ConversationRenameSerializer(serializers.ModelSerializer):
+    """Validates a user-supplied conversation title for the rename feature."""
+
+    class Meta:
+        model = Conversation
+        fields = ['title']
+
+    def validate_title(self, value):
+        cleaned = ' '.join(value.split())
+        if not cleaned:
+            raise serializers.ValidationError('Title cannot be empty.')
+        return cleaned[:120]
+
+
 class ChatRequestSerializer(serializers.Serializer):
     conversation_id = serializers.UUIDField(required=False, allow_null=True)
     message = serializers.CharField(allow_blank=False, trim_whitespace=True)
