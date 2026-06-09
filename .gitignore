@@ -28,3 +28,7 @@ Documentation/
 desktop.ini
 verify_shots/
 images/
+# ...but not bundled static assets (e.g. the health-tip placeholder), which must
+# be committed and deployed for {% static %} + ManifestStaticFilesStorage.
+!backend/theme/static/images/
+!backend/theme/static/images/**
