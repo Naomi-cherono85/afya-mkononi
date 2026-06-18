@@ -1,6 +1,16 @@
 from django.contrib import admin
 
-from .models import Conversation, Message
+from .models import ChatAttachment, Conversation, Message
+
+
+class ChatAttachmentInline(admin.TabularInline):
+    model = ChatAttachment
+    extra = 0
+    can_delete = False
+    readonly_fields = ['file', 'original_name', 'kind', 'content_type', 'created_at']
+
+    def has_add_permission(self, request, obj=None):
+        return False
 
 
 class MessageInline(admin.TabularInline):
@@ -16,6 +26,14 @@ class MessageInline(admin.TabularInline):
 
     def has_add_permission(self, request, obj=None):
         return False
+
+
+@admin.register(ChatAttachment)
+class ChatAttachmentAdmin(admin.ModelAdmin):
+    list_display = ['name', 'kind', 'message', 'created_at']
+    list_filter = ['kind', 'created_at']
+    search_fields = ['original_name', 'message__conversation__id']
+    readonly_fields = ['created_at']
 
 
 @admin.register(Conversation)

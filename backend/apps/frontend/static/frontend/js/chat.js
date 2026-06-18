@@ -3,6 +3,11 @@
     if (!form) return;
 
     const input = document.getElementById('chat-input');
+    const attachBtn = document.getElementById('chat-attach');
+    const fileInput = document.getElementById('chat-file');
+    const attachPreview = document.getElementById('attachment-preview');
+    const attachName = document.getElementById('attachment-name');
+    const attachRemove = document.getElementById('attachment-remove');
     const sendBtn = document.getElementById('chat-send');
     const sendIcon = sendBtn ? sendBtn.querySelector('[data-send-icon]') : null;
     const sendSpinner = sendBtn ? sendBtn.querySelector('[data-send-spinner]') : null;
@@ -22,6 +27,13 @@
 
     let conversationId = null;
     let pending = false;
+    let selectedFile = null;
+
+    // Mirror the server-side attachment policy (apps/chatbot/models.py).
+    const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'pdf', 'docx', 'txt'];
+    const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
+    const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB
+    const extOf = (name) => (name.split('.').pop() || '').toLowerCase();
 
     const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
     const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) => ESC[c]);
@@ -67,9 +79,51 @@
         });
     };
 
-    const appendUser = (text) => {
+    // Build the rendered attachment for a user bubble.
+    // `att` = { url, name, is_image }.
+    const buildAttachment = (att) => {
+        if (att.is_image) {
+            const link = document.createElement('a');
+            link.href = att.url;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            const img = document.createElement('img');
+            img.src = att.url;
+            img.alt = att.name;
+            img.className = 'rounded-lg max-h-56 max-w-full object-contain';
+            link.appendChild(img);
+            return link;
+        }
+        const link = document.createElement('a');
+        link.href = att.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.className = 'flex items-center gap-2 px-3 py-2 rounded-soft bg-background/70 border border-accent-tint hover:bg-background transition';
+        link.innerHTML =
+            '<svg class="w-5 h-5 text-accent shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">' +
+            '<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>' +
+            '<span class="truncate"></span>';
+        link.querySelector('span').textContent = att.name;
+        return link;
+    };
+
+    const appendUser = (text, attachments) => {
         const node = userTpl.content.firstElementChild.cloneNode(true);
-        node.querySelector('[data-content]').textContent = text;
+        const slot = node.querySelector('[data-content]');
+        if (text) {
+            slot.textContent = text;
+        } else {
+            slot.remove();
+        }
+        const attSlot = node.querySelector('[data-attachment]');
+        const list = (attachments || []).filter((a) => a && a.url);
+        if (list.length) {
+            attSlot.classList.remove('hidden');
+            attSlot.classList.add('flex', 'flex-col', 'gap-2');
+            list.forEach((att) => attSlot.appendChild(buildAttachment(att)));
+        } else {
+            attSlot.remove();
+        }
         thread.appendChild(node);
         thread.scrollTop = thread.scrollHeight;
     };
@@ -102,6 +156,7 @@
         pending = state;
         sendBtn.disabled = state;
         input.disabled = state;
+        if (attachBtn) attachBtn.disabled = state;
         if (sendIcon && sendSpinner) {
             sendIcon.classList.toggle('hidden', state);
             sendSpinner.classList.toggle('hidden', !state);
@@ -173,8 +228,11 @@
             if (titleEl) titleEl.textContent = data.display_title || 'Chat Assistant';
             clearThread();
             (data.messages || []).forEach((m) => {
-                if (m.sender_type === 'USER') appendUser(m.message_content);
-                else if (m.sender_type === 'AI') appendAi(m.message_content);
+                if (m.sender_type === 'USER') {
+                    appendUser(m.message_content, m.attachments || []);
+                } else if (m.sender_type === 'AI') {
+                    appendAi(m.message_content);
+                }
             });
             setActive(id);
         } catch (err) {
@@ -293,34 +351,96 @@
     document.getElementById('new-chat-btn')?.addEventListener('click', startNewChat);
     document.getElementById('new-chat-btn-mobile')?.addEventListener('click', startNewChat);
 
+    // ---- Attachment picking ----
+
+    const clearAttachment = () => {
+        selectedFile = null;
+        if (fileInput) fileInput.value = '';
+        if (attachPreview) {
+            attachPreview.classList.add('hidden');
+            attachPreview.classList.remove('flex');
+        }
+        if (attachName) attachName.textContent = '';
+    };
+
+    const showAttachment = (file) => {
+        selectedFile = file;
+        if (attachName) attachName.textContent = file.name;
+        if (attachPreview) {
+            attachPreview.classList.remove('hidden');
+            attachPreview.classList.add('flex');
+        }
+    };
+
+    if (attachBtn) {
+        attachBtn.addEventListener('click', () => {
+            if (pending) return;
+            fileInput.click();
+        });
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) return;
+            if (!ALLOWED_EXTENSIONS.includes(extOf(file.name))) {
+                appendError('Unsupported file type. Allowed: images (JPG, PNG, WEBP), PDF, DOCX, or TXT.');
+                clearAttachment();
+                return;
+            }
+            if (file.size > MAX_FILE_BYTES) {
+                appendError('That file is too large. The maximum size is 10 MB.');
+                clearAttachment();
+                return;
+            }
+            showAttachment(file);
+        });
+    }
+
+    if (attachRemove) attachRemove.addEventListener('click', clearAttachment);
+
     // ---- Sending ----
 
     const FRIENDLY_ERROR = 'Sorry, the assistant is temporarily unavailable. Please try again in a moment.';
 
     const sendMessage = async (message) => {
         const trimmed = message.trim();
-        if (!trimmed || pending) return;
+        const file = selectedFile;
+        // Need either text or a file to send.
+        if ((!trimmed && !file) || pending) return;
 
         hideIntro();
-        appendUser(trimmed);
+
+        // Render the user's bubble immediately, including a local preview of the
+        // attachment (object URL for images, filename chip otherwise).
+        const localAttachments = file ? [{
+            name: file.name,
+            is_image: IMAGE_EXTENSIONS.includes(extOf(file.name)),
+            url: URL.createObjectURL(file),
+        }] : [];
+        appendUser(trimmed, localAttachments);
+
         input.value = '';
         setPending(true);
 
         const typingNode = showTyping();
 
+        // Multipart so the file rides along with the message fields.
+        const body = new FormData();
+        if (trimmed) body.append('message', trimmed);
+        if (file) body.append('attachment', file);
+        if (conversationId) body.append('conversation_id', conversationId);
+
         try {
             const res = await fetch('/api/chat/', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    // No Content-Type: the browser sets the multipart boundary.
                     'Accept': 'application/json',
                     'X-CSRFToken': csrfInput.value,
                 },
                 credentials: 'same-origin',
-                body: JSON.stringify({
-                    message: trimmed,
-                    ...(conversationId ? { conversation_id: conversationId } : {}),
-                }),
+                body,
             });
 
             typingNode.remove();
@@ -347,6 +467,7 @@
             typingNode.remove();
             appendError(FRIENDLY_ERROR);
         } finally {
+            clearAttachment();
             setPending(false);
             input.focus();
         }

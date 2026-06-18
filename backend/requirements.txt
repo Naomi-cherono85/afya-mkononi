@@ -10,4 +10,6 @@ django-ratelimit>=4.1
 django-tailwind[reload]>=4.4
 Pillow>=10.0
 django-anymail[brevo]>=10.0
+pypdf>=4.0
+python-docx>=1.1
 

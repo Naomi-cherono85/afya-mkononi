@@ -37,6 +37,19 @@ If the user describes signs of a medical emergency (chest pain, difficulty breat
 2. Instruct them to call Kenya emergency services (999 / 112) or go to the nearest hospital immediately.
 3. Keep the message short and direct. Do not give home treatment steps.
 
+IMAGES AND DOCUMENTS
+Users may share an image (e.g. a photo of a skin area, a rash, or a document) or
+a text document (PDF/DOCX/TXT, e.g. a lab report or discharge summary).
+- Images are for EDUCATIONAL GUIDANCE ONLY. Do NOT diagnose diseases or
+  conditions from an image. You may describe, in general terms, what is visible
+  and what such appearances can sometimes be associated with — never a verdict.
+- If an image suggests a potentially serious condition, clearly recommend
+  evaluation by a qualified healthcare professional.
+- For documents, you may summarise or explain the content in plain language and
+  help the user understand terminology, while still never diagnosing or
+  prescribing. Remind the user to discuss results with their clinician.
+- If an image is unclear or you cannot tell what it shows, say so plainly.
+
 STYLE
 - 2-4 short paragraphs is usually enough.
 - If a question is outside healthcare, briefly redirect to health-related help.
@@ -100,18 +113,82 @@ def _build_history(conversation: Conversation, limit: int) -> list[dict]:
     }
     messages = []
     for msg in recent:
+        # History is text-only: prior images/documents are summarised as a short
+        # note rather than re-uploaded every turn (cost + the Anthropic API
+        # rejects empty content for attachment-only turns).
+        content = msg.message_content
+        if not content:
+            names = [a.name for a in msg.attachments.all()]
+            if names:
+                content = f"(The user previously shared: {', '.join(names)}.)"
+        if not content:
+            continue
         messages.append({
             'role': role_map[msg.sender_type],
-            'content': msg.message_content,
+            'content': content,
         })
     return messages
 
 
-def generate_reply(conversation: Conversation, user_message: str) -> Tuple[str, str]:
+def _build_user_content(user_message: str, attachment):
+    """Build the Anthropic ``content`` for the current user turn.
+
+    * No attachment -> plain string.
+    * Image -> list of [image block, text block] (Anthropic vision).
+    * Document -> string with the extracted text folded in.
+
+    Returns a string or a list of content blocks.
+    """
+    if attachment is None:
+        return user_message
+
+    # Local import keeps the Anthropic module free of Django/storage concerns.
+    from . import attachments as attachment_service
+
+    if attachment.is_image:
+        payload = attachment_service.image_payload(attachment)
+        if payload is None:
+            # Could not read the image — fall back to a text-only note.
+            note = f"(The user tried to share an image named '{attachment.name}' but it could not be read.)"
+            return f"{user_message}\n\n{note}" if user_message else note
+        text = user_message.strip() or (
+            "I'm sharing an image. Please give general, educational health "
+            "information about what it may show. Do not diagnose."
+        )
+        return [
+            {
+                'type': 'image',
+                'source': {
+                    'type': 'base64',
+                    'media_type': payload['media_type'],
+                    'data': payload['data'],
+                },
+            },
+            {'type': 'text', 'text': text},
+        ]
+
+    # Document: fold extracted text into the prompt.
+    extracted = attachment.extracted_text or ''
+    if extracted:
+        doc_block = (
+            f"The user shared a document named '{attachment.name}'. "
+            f"Here is its extracted text:\n\n\"\"\"\n{extracted}\n\"\"\""
+        )
+    else:
+        doc_block = (
+            f"The user shared a document named '{attachment.name}', but no text "
+            f"could be extracted from it."
+        )
+    return f"{user_message}\n\n{doc_block}" if user_message.strip() else doc_block
+
+
+def generate_reply(conversation: Conversation, user_message: str, attachment=None) -> Tuple[str, str]:
     """Generate a Claude reply for the given conversation and new user message.
 
-    Returns (reply_text, safety_category). On any API failure returns a safe
-    fallback so the chat flow never breaks.
+    ``attachment`` is an optional ``ChatAttachment`` for the current turn: images
+    are sent as Anthropic vision input, documents have their extracted text
+    folded into the prompt. Returns (reply_text, safety_category). On any API
+    failure returns a safe fallback so the chat flow never breaks.
 
     The caller persists both the user message (before this call) and the
     returned AI message — ai_service.py does not touch the database.
@@ -122,7 +199,7 @@ def generate_reply(conversation: Conversation, user_message: str) -> Tuple[str, 
         return FALLBACK_REPLY, Message.SafetyCategory.NORMAL
 
     history = _build_history(conversation, settings.ANTHROPIC_HISTORY_TURNS)
-    history.append({'role': 'user', 'content': user_message})
+    history.append({'role': 'user', 'content': _build_user_content(user_message, attachment)})
 
     try:
         client = anthropic.Anthropic(api_key=api_key)

@@ -1,9 +1,37 @@
 from rest_framework import serializers
 
-from .models import Conversation, Message
+from django.core.validators import FileExtensionValidator
+
+from .models import (
+    ALLOWED_ATTACHMENT_EXTENSIONS,
+    ChatAttachment,
+    Conversation,
+    Message,
+    validate_attachment_size,
+)
+
+
+class ChatAttachmentSerializer(serializers.ModelSerializer):
+    url = serializers.SerializerMethodField()
+    name = serializers.CharField(read_only=True)
+    is_image = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = ChatAttachment
+        fields = ['id', 'url', 'name', 'kind', 'is_image', 'content_type', 'created_at']
+        read_only_fields = fields
+
+    def get_url(self, obj):
+        if not obj.file:
+            return None
+        url = obj.file.url
+        request = self.context.get('request')
+        return request.build_absolute_uri(url) if request else url
 
 
 class MessageSerializer(serializers.ModelSerializer):
+    attachments = ChatAttachmentSerializer(many=True, read_only=True)
+
     class Meta:
         model = Message
         fields = [
@@ -12,6 +40,7 @@ class MessageSerializer(serializers.ModelSerializer):
             'sender_type',
             'message_content',
             'safety_category',
+            'attachments',
             'created_at',
         ]
         read_only_fields = ['id', 'conversation', 'created_at']
@@ -63,4 +92,23 @@ class ConversationRenameSerializer(serializers.ModelSerializer):
 
 class ChatRequestSerializer(serializers.Serializer):
     conversation_id = serializers.UUIDField(required=False, allow_null=True)
-    message = serializers.CharField(allow_blank=False, trim_whitespace=True)
+    # Message is now optional: a user may send a file with no accompanying text.
+    message = serializers.CharField(
+        required=False, allow_blank=True, trim_whitespace=True, default='',
+    )
+    attachment = serializers.FileField(
+        required=False,
+        allow_null=True,
+        validators=[
+            FileExtensionValidator(ALLOWED_ATTACHMENT_EXTENSIONS),
+            validate_attachment_size,
+        ],
+    )
+
+    def validate(self, attrs):
+        # Require at least one of text or file so empty submissions are rejected.
+        if not (attrs.get('message') or '').strip() and not attrs.get('attachment'):
+            raise serializers.ValidationError(
+                {'message': 'Enter a message or attach a file.'}
+            )
+        return attrs

@@ -117,19 +117,48 @@
             </div>
 
             <div class="border-t border-border px-4 sm:px-6 py-4 bg-muted/30 rounded-b-card">
-                <form id="chat-form" class="flex items-center gap-3">
-                    <div class="flex-1 min-w-0 relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/40">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
-                        </span>
-                        <input
-                            type="text"
-                            id="chat-input"
-                            autocomplete="off"
-                            placeholder="Type your message here…"
-                            class="w-full pl-11 pr-4 py-3 rounded-pill border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 text-sm bg-background"
-                        >
+                <form id="chat-form" class="flex flex-col gap-2">
+
+                    {# Selected-file preview chip: shown after the user picks a file, before sending. #}
+                    <div id="attachment-preview"
+                         class="hidden items-center gap-2 self-start max-w-full pl-3 pr-2 py-1.5 rounded-pill bg-accent-soft border border-accent-tint text-sm text-foreground">
+                        <svg class="w-4 h-4 text-accent shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
+                        <span id="attachment-name" class="truncate max-w-[200px] sm:max-w-[320px]"></span>
+                        <button type="button" id="attachment-remove"
+                                class="w-6 h-6 rounded-full flex items-center justify-center text-foreground/50 hover:text-danger hover:bg-background transition shrink-0"
+                                aria-label="Remove attachment" title="Remove attachment">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg>
+                        </button>
                     </div>
+
+                    <div class="flex items-center gap-3">
+
+                        {# Paperclip: opens the device file picker via the hidden input below. #}
+                        <input
+                            type="file"
+                            id="chat-file"
+                            class="hidden"
+                            accept=".jpg,.jpeg,.png,.webp,.pdf,.docx,.txt,image/jpeg,image/png,image/webp,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                        >
+                        <button
+                            type="button"
+                            id="chat-attach"
+                            aria-label="Attach a file"
+                            title="Attach a file"
+                            class="w-12 h-12 rounded-full border border-border bg-background text-foreground/60 flex items-center justify-center hover:text-accent hover:border-accent disabled:opacity-60 disabled:cursor-not-allowed transition shrink-0"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"/></svg>
+                        </button>
+
+                        <div class="flex-1 min-w-0 relative">
+                            <input
+                                type="text"
+                                id="chat-input"
+                                autocomplete="off"
+                                placeholder="Type your message here…"
+                                class="w-full px-4 py-3 rounded-pill border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 text-sm bg-background"
+                            >
+                        </div>
                     <button
                         type="submit"
                         id="chat-send"
@@ -144,6 +173,7 @@
                             <path stroke-linecap="round" d="M21 12a9 9 0 0 0-9-9"/>
                         </svg>
                     </button>
+                    </div>
                 </form>
                 <p class="mt-3 text-center text-xs text-foreground/55">
                     Afya Mkononi provides general information only and does not replace professional medical care.
@@ -154,7 +184,10 @@
 
         <template id="chat-user-bubble">
             <div class="flex justify-end">
-                <div class="max-w-[85%] sm:max-w-[75%] bg-accent-soft text-foreground border border-accent-tint rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed break-words" data-content></div>
+                <div class="max-w-[85%] sm:max-w-[75%] bg-accent-soft text-foreground border border-accent-tint rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed break-words flex flex-col gap-2">
+                    <span data-content class="whitespace-pre-line"></span>
+                    <span data-attachment class="hidden"></span>
+                </div>
             </div>
         </template>
 
