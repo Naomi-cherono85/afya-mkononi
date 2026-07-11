@@ -1,0 +1,46 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}{{ article.title }} — Afya Mkononi{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto flex flex-col gap-4">
+
+    <a href="{% url 'frontend:library' %}" class="inline-flex items-center gap-1.5 text-sm font-medium text-foreground/60 hover:text-foreground">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+        Back to library
+    </a>
+
+    <article class="bg-background rounded-card shadow-card overflow-hidden">
+        {% if article.image %}
+            <img src="{{ article.image.url }}" alt="" class="w-full h-52 object-cover">
+        {% endif %}
+        <div class="p-6 sm:p-8">
+            <span class="text-xs font-medium text-accent bg-accent/10 px-2.5 py-1 rounded-pill">{{ article.get_category_display }}</span>
+            <h1 class="text-2xl font-bold text-foreground mt-3 mb-2">{{ article.title }}</h1>
+            <p class="text-foreground/70 leading-relaxed mb-5">{{ article.summary }}</p>
+            <div class="prose-sm text-foreground/80 leading-relaxed whitespace-pre-line border-t border-border pt-5">{{ article.content }}</div>
+
+            <p class="mt-6 text-xs text-foreground/45 border-t border-border pt-4">
+                This article is for general information only and does not replace professional medical advice.
+            </p>
+        </div>
+    </article>
+
+    {% if related %}
+        <div class="bg-background rounded-card shadow-card p-5">
+            <h2 class="font-semibold text-foreground text-sm mb-3">Related articles</h2>
+            <ul class="flex flex-col divide-y divide-border/70">
+                {% for r in related %}
+                    <li class="py-2.5 first:pt-0 last:pb-0">
+                        <a href="{{ r.get_absolute_url }}" class="block hover:bg-muted -mx-2 px-2 py-1 rounded-soft transition">
+                            <div class="text-sm font-medium text-foreground">{{ r.title }}</div>
+                            <div class="text-xs text-foreground/55">{{ r.summary|truncatechars:80 }}</div>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

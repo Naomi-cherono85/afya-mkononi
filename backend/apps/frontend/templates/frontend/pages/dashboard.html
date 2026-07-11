@@ -49,6 +49,16 @@
                         </div>
                     </a>
 
+                    <a href="{% url 'frontend:library' %}" class="flex items-center gap-3 p-4 rounded-soft border border-border bg-background hover:border-accent hover:bg-accent-soft/50 transition group">
+                        <div class="w-11 h-11 rounded-soft bg-accent-soft group-hover:bg-accent-tint flex items-center justify-center shrink-0 transition">
+                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 0 0 6 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 0 1 6 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 0 1 6-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0 0 18 18a8.967 8.967 0 0 0-6 2.292m0-14.25v14.25"/></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="font-semibold text-sm text-foreground">Health Library</div>
+                            <div class="text-xs text-foreground/60 mt-0.5">Read trusted articles</div>
+                        </div>
+                    </a>
+
                     <a href="{% url 'frontend:about' %}" class="flex items-center gap-3 p-4 rounded-soft border border-border bg-background hover:border-accent hover:bg-accent-soft/50 transition group">
                         <div class="w-11 h-11 rounded-soft bg-accent-soft group-hover:bg-accent-tint flex items-center justify-center shrink-0 transition">
                             <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/></svg>
@@ -59,6 +69,63 @@
                         </div>
                     </a>
                 </div>
+            </div>
+        </div>
+
+        {# Quick statistics #}
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <a href="{% url 'frontend:appointment-list' %}" class="bg-background rounded-card shadow-card p-4 hover:shadow-card-hover transition">
+                <div class="text-2xl font-bold text-foreground">{{ quick_stats.upcoming_appointments }}</div>
+                <div class="text-xs text-foreground/60 mt-0.5">Upcoming appointments</div>
+            </a>
+            <a href="{% url 'frontend:reminder-list' %}" class="bg-background rounded-card shadow-card p-4 hover:shadow-card-hover transition">
+                <div class="text-2xl font-bold text-foreground">{{ quick_stats.pending_reminders }}</div>
+                <div class="text-xs text-foreground/60 mt-0.5">Pending reminders</div>
+            </a>
+            <a href="{% url 'frontend:chat' %}" class="bg-background rounded-card shadow-card p-4 hover:shadow-card-hover transition">
+                <div class="text-2xl font-bold text-foreground">{{ quick_stats.conversations }}</div>
+                <div class="text-xs text-foreground/60 mt-0.5">Conversations</div>
+            </a>
+            <a href="{% url 'frontend:notifications' %}" class="bg-background rounded-card shadow-card p-4 hover:shadow-card-hover transition">
+                <div class="text-2xl font-bold {% if quick_stats.unread_notifications %}text-accent{% else %}text-foreground{% endif %}">{{ quick_stats.unread_notifications }}</div>
+                <div class="text-xs text-foreground/60 mt-0.5">Unread alerts</div>
+            </a>
+        </div>
+
+        {# Next reminder + recent conversation #}
+        <div class="grid sm:grid-cols-2 gap-4">
+            <div class="bg-background rounded-card shadow-card p-5">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-7 h-7 rounded-soft bg-accent-soft flex items-center justify-center">
+                        <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                    </div>
+                    <h2 class="font-semibold text-foreground text-sm">Next reminder</h2>
+                </div>
+                {% if next_reminder %}
+                    <div class="font-medium text-sm text-foreground">{{ next_reminder.reminder_message|truncatechars:60 }}</div>
+                    <div class="text-xs text-foreground/60 mt-1">{{ next_reminder.scheduled_for|date:"D, j M" }} at {{ next_reminder.scheduled_for|time:"g:i A" }}</div>
+                    <a href="{% url 'frontend:reminder-list' %}" class="inline-block mt-3 text-xs font-medium text-accent hover:underline">View all reminders &rarr;</a>
+                {% else %}
+                    <p class="text-sm text-foreground/60">No upcoming reminders. <a href="{% url 'frontend:reminder-create' %}" class="text-accent font-medium hover:underline">Create one</a>.</p>
+                {% endif %}
+            </div>
+
+            <div class="bg-background rounded-card shadow-card p-5">
+                <div class="flex items-center gap-2 mb-3">
+                    <div class="w-7 h-7 rounded-soft bg-accent-soft flex items-center justify-center">
+                        <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.068.157 2.148.279 3.238.364.466.037.893.281 1.153.671L12 21l2.652-3.978c.26-.39.687-.634 1.153-.67 1.09-.086 2.17-.208 3.238-.365 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"/></svg>
+                    </div>
+                    <h2 class="font-semibold text-foreground text-sm">Recent conversation</h2>
+                </div>
+                {% if recent_conversation %}
+                    <a href="{% url 'frontend:chat' %}" class="block">
+                        <div class="font-medium text-sm text-foreground truncate">{{ recent_conversation.display_title }}</div>
+                        <div class="text-xs text-foreground/60 mt-1">Updated {{ recent_conversation.updated_at|date:"D, j M, g:i A" }}</div>
+                        <span class="inline-block mt-3 text-xs font-medium text-accent hover:underline">Continue chatting &rarr;</span>
+                    </a>
+                {% else %}
+                    <p class="text-sm text-foreground/60">No conversations yet. <a href="{% url 'frontend:chat' %}" class="text-accent font-medium hover:underline">Ask the assistant</a>.</p>
+                {% endif %}
             </div>
         </div>
 

@@ -1,0 +1,18 @@
+{% comment %}
+Reusable pager. Pass:
+  page_obj — a Django Page object
+  q        — optional current search query, preserved across pages
+{% endcomment %}
+{% if page_obj.paginator.num_pages > 1 %}
+<div class="flex items-center justify-center gap-3 mt-6">
+    {% if page_obj.has_previous %}
+        <a href="?{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}"
+           class="text-sm font-medium text-foreground/70 bg-background border border-border px-4 py-2 rounded-pill hover:bg-muted transition">Previous</a>
+    {% endif %}
+    <span class="text-sm text-foreground/55">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+        <a href="?{% if q %}q={{ q|urlencode }}&{% endif %}page={{ page_obj.next_page_number }}"
+           class="text-sm font-medium text-foreground/70 bg-background border border-border px-4 py-2 rounded-pill hover:bg-muted transition">Next</a>
+    {% endif %}
+</div>
+{% endif %}

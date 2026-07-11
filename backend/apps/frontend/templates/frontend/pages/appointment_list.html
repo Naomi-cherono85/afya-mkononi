@@ -1,0 +1,61 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}My Appointments — Afya Mkononi{% endblock %}
+
+{% block content %}
+<div class="flex flex-col gap-4">
+
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+            <h1 class="text-2xl font-bold text-foreground">My Appointments</h1>
+            <p class="text-foreground/60 text-sm mt-0.5">View, reschedule or cancel your clinic visits.</p>
+        </div>
+        <a href="{% url 'frontend:appointment-book' %}"
+           class="bg-accent text-white font-semibold text-sm px-5 py-2.5 rounded-pill hover:bg-accent-hover transition shrink-0">
+            Book appointment
+        </a>
+    </div>
+
+    {# Search #}
+    <form method="get" class="bg-background rounded-card shadow-card p-3">
+        <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-foreground/40 ml-1 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+            <input type="search" name="q" value="{{ q }}" placeholder="Search by name, reason or phone…"
+                   class="flex-1 min-w-0 py-1.5 text-sm bg-transparent focus:outline-none text-foreground placeholder:text-foreground/40">
+            {% if q %}<a href="{% url 'frontend:appointment-list' %}" class="text-xs text-foreground/50 hover:text-foreground shrink-0 px-2">Clear</a>{% endif %}
+        </div>
+    </form>
+
+    {% if appointments %}
+        <ul class="flex flex-col gap-3">
+            {% for appt in appointments %}
+                <li>
+                    <a href="{% url 'frontend:appointment-detail' appt.pk %}"
+                       class="block bg-background rounded-card shadow-card p-5 hover:shadow-card-hover transition">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <div class="font-semibold text-foreground truncate">{{ appt.reason_for_visit|truncatechars:60 }}</div>
+                                <div class="flex items-center gap-1.5 text-xs text-foreground/65 mt-1.5">
+                                    <svg class="w-3.5 h-3.5 text-accent shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75"/></svg>
+                                    <span>{{ appt.preferred_date|date:"D, j M Y" }} &middot; {{ appt.preferred_time|time:"g:i A" }}</span>
+                                </div>
+                            </div>
+                            {% include 'frontend/partials/_status_badge.html' with status=appt.status label=appt.get_status_display %}
+                        </div>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+        {% include 'frontend/partials/_pagination.html' with page_obj=appointments q=q %}
+    {% else %}
+        <div class="bg-background rounded-card shadow-card p-10 text-center">
+            <div class="w-12 h-12 mx-auto rounded-full bg-accent-soft flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+            </div>
+            <p class="text-sm text-foreground/60">{% if q %}No appointments match “{{ q }}”.{% else %}You have no appointments yet.{% endif %}</p>
+            {% if not q %}<a href="{% url 'frontend:appointment-book' %}" class="inline-block mt-3 text-accent font-medium text-sm hover:underline">Book your first appointment</a>{% endif %}
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -10,7 +10,7 @@ User = get_user_model()
 class ProfileInline(admin.StackedInline):
     model = Profile
     can_delete = False
-    fields = ('avatar', 'phone_number', 'date_of_birth')
+    fields = ('avatar', 'avatar_choice', 'phone_number', 'date_of_birth', 'gender')
     extra = 0
 
 
@@ -26,5 +26,7 @@ class UserAdmin(BaseUserAdmin):
 
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'phone_number', 'created_at')
+    list_display = ('user', 'phone_number', 'gender', 'created_at')
+    list_filter = ('gender', 'created_at')
     search_fields = ('user__username', 'user__email', 'phone_number')
+    list_select_related = ('user',)
