@@ -106,11 +106,11 @@ class UserDetailsForm(forms.ModelForm):
 
 
 class ProfileForm(forms.ModelForm):
-    """Edit avatar and contact details on the profile page."""
+    """Edit contact details on the profile page (avatar is handled separately)."""
 
     class Meta:
         model = Profile
-        fields = ('avatar', 'phone_number', 'date_of_birth')
+        fields = ('phone_number', 'date_of_birth', 'gender')
         widgets = {
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
         }
@@ -118,6 +118,18 @@ class ProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         _style(self.fields, {'phone_number': '+254 7XX XXX XXX'})
+
+
+class AvatarForm(forms.ModelForm):
+    """Upload a profile photo. Kept separate so the picker/upload/delete
+    actions on the profile page can be handled independently of the details form."""
+
+    class Meta:
+        model = Profile
+        fields = ('avatar',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         # File inputs get a lighter custom style instead of the boxed input.
         self.fields['avatar'].widget.attrs['class'] = (
             'block w-full text-sm text-foreground/70 file:mr-4 file:py-2 '

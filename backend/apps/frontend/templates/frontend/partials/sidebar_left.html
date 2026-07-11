@@ -13,9 +13,27 @@
 
     <nav class="bg-background rounded-card shadow-card p-2 flex flex-col gap-0.5">
         {% include 'frontend/partials/_nav_item.html' with url_name='dashboard' label='Dashboard' sublabel='Home & overview' active=active icon='home' %}
-        {% include 'frontend/partials/_nav_item.html' with url_name='appointment-book' label='Appointments' sublabel='Book & manage' active=active icon='calendar' %}
-        {% include 'frontend/partials/_nav_item.html' with url_name='reminder-create' label='Reminders' sublabel='Medication & follow-ups' active=active icon='bell' %}
+        {% include 'frontend/partials/_nav_item.html' with url_name='appointment-list' label='Appointments' sublabel='Book & manage' active=active icon='calendar' section='appointment-list appointment-book appointment-detail appointment-edit' %}
+        {% include 'frontend/partials/_nav_item.html' with url_name='reminder-list' label='Reminders' sublabel='Medication & follow-ups' active=active icon='bell' section='reminder-list reminder-create reminder-edit' %}
         {% include 'frontend/partials/_nav_item.html' with url_name='chat' label='Chat Assistant' sublabel='Get health guidance' active=active icon='chat' %}
+        {% include 'frontend/partials/_nav_item.html' with url_name='library' label='Health Library' sublabel='Trusted health articles' active=active icon='book' section='library library-article' %}
+        {% include 'frontend/partials/_nav_item.html' with url_name='search' label='Search' sublabel='Find anything quickly' active=active icon='search' %}
+
+        {# Notifications: custom link so we can show the unread badge. #}
+        <a href="{% url 'frontend:notifications' %}"
+           class="flex items-start gap-3 p-3 rounded-soft transition {% if active == 'notifications' %}bg-accent-soft text-accent{% else %}text-foreground hover:bg-muted{% endif %}">
+            <div class="w-6 h-6 shrink-0 flex items-center justify-center relative {% if active == 'notifications' %}text-accent{% else %}text-foreground/70{% endif %}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75v-.7V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5"/></svg>
+                {% if unread_notifications_count %}
+                    <span class="absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 rounded-full bg-danger text-white text-[10px] font-bold flex items-center justify-center">{{ unread_notifications_count }}</span>
+                {% endif %}
+            </div>
+            <div class="leading-tight min-w-0">
+                <div class="text-sm font-semibold {% if active == 'notifications' %}text-accent{% else %}text-foreground{% endif %}">Notifications</div>
+                <div class="text-xs {% if active == 'notifications' %}text-accent/75{% else %}text-foreground/55{% endif %}">Messages & alerts</div>
+            </div>
+        </a>
+
         {% include 'frontend/partials/_nav_item.html' with url_name='about' label='About & Help' sublabel='How Afya Mkononi works' active=active icon='info' %}
     </nav>
 
@@ -39,8 +57,8 @@
     {% if user.is_authenticated %}
     <div class="bg-background rounded-card shadow-card p-3">
         <a href="{% url 'accounts:profile' %}" class="flex items-center gap-3 p-2 rounded-soft hover:bg-muted transition">
-            {% if user.profile.avatar %}
-                <img src="{{ user.profile.avatar.url }}" alt="{{ user.profile.display_name }}"
+            {% if user.profile.avatar_display_url %}
+                <img src="{{ user.profile.avatar_display_url }}" alt="{{ user.profile.display_name }}"
                      class="w-10 h-10 rounded-full object-cover ring-2 ring-accent-tint shrink-0">
             {% else %}
                 <div class="w-10 h-10 rounded-full bg-accent-soft text-accent flex items-center justify-center text-sm font-semibold ring-2 ring-accent-tint shrink-0">

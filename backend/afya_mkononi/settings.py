@@ -5,6 +5,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import sys
 from pathlib import Path
 
 import dj_database_url
@@ -42,6 +43,8 @@ INSTALLED_APPS = [
     'apps.appointments',
     'apps.reminders',
     'apps.health_tips',
+    'apps.health_library',
+    'apps.notifications',
     'apps.frontend',
 ]
 
@@ -75,6 +78,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'apps.core.context_processors.site_settings',
                 'apps.health_tips.context_processors.health_tip_of_the_day',
+                'apps.notifications.context_processors.notifications',
             ],
         },
     },
@@ -169,6 +173,14 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+# Under the test runner, use the plain (non-manifest) static storage so
+# templates that render {% static %} / {% tailwind_css %} don't require a
+# collected manifest. Production keeps the hashed, compressed storage above.
+if 'test' in sys.argv:
+    STORAGES["staticfiles"]["BACKEND"] = (
+        "django.contrib.staticfiles.storage.StaticFilesStorage"
+    )
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

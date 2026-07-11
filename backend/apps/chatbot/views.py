@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from .models import ChatAttachment, Conversation, Message
 from .serializers import (
+    ChatAttachmentSerializer,
     ChatRequestSerializer,
     ConversationListSerializer,
     ConversationRenameSerializer,
@@ -81,11 +82,20 @@ def chat(request):
     # Bump updated_at so the conversation rises to the top of the history list.
     conversation.save(update_fields=['updated_at'])
 
+    attachment_data = (
+        ChatAttachmentSerializer(chat_attachment, context={'request': request}).data
+        if chat_attachment else None
+    )
+
     return Response(
         {
             'conversation_id': str(conversation.id),
             'title': conversation.display_title,
             'reply': reply_text,
+            # Lets the client suppress follow-up chips on emergency/refused replies.
+            'safety_category': safety_category,
+            # Echoes the just-uploaded file so the sent message can preview it inline.
+            'attachment': attachment_data,
         },
         status=status.HTTP_200_OK,
     )

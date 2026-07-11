@@ -10,9 +10,19 @@ edge to edge, and sticky so it stays put while content scrolls.
         <span class="text-base font-bold text-foreground truncate">Afya Mkononi</span>
     </a>
 
+    <div class="flex items-center gap-1.5 shrink-0">
+    <a href="{% url 'frontend:search' %}" class="w-9 h-9 rounded-full flex items-center justify-center text-foreground/70 hover:bg-muted transition" aria-label="Search">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+    </a>
+    <a href="{% url 'frontend:notifications' %}" class="relative w-9 h-9 rounded-full flex items-center justify-center text-foreground/70 hover:bg-muted transition" aria-label="Notifications">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+        {% if unread_notifications_count %}
+            <span class="absolute top-1 right-1 min-w-4 h-4 px-1 rounded-full bg-danger text-white text-[10px] font-bold flex items-center justify-center">{{ unread_notifications_count }}</span>
+        {% endif %}
+    </a>
     <a href="{% url 'accounts:profile' %}" class="shrink-0" aria-label="Your profile">
-        {% if user.profile.avatar %}
-            <img src="{{ user.profile.avatar.url }}" alt="{{ user.profile.display_name }}"
+        {% if user.profile.avatar_display_url %}
+            <img src="{{ user.profile.avatar_display_url }}" alt="{{ user.profile.display_name }}"
                  class="w-9 h-9 rounded-full object-cover ring-2 ring-accent-tint">
         {% else %}
             <div class="w-9 h-9 rounded-full bg-accent-soft text-accent flex items-center justify-center text-sm font-semibold ring-2 ring-accent-tint">
@@ -20,5 +30,6 @@ edge to edge, and sticky so it stays put while content scrolls.
             </div>
         {% endif %}
     </a>
+    </div>
 
 </header>

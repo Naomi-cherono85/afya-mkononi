@@ -1,0 +1,46 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Appointment details — Afya Mkononi{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto flex flex-col gap-4">
+
+    <a href="{% url 'frontend:appointment-list' %}" class="inline-flex items-center gap-1.5 text-sm font-medium text-foreground/60 hover:text-foreground">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+        Back to appointments
+    </a>
+
+    <div class="bg-background rounded-card shadow-card p-5 sm:p-6">
+        <div class="flex items-start justify-between gap-3 mb-5">
+            <h1 class="text-xl font-bold text-foreground">Appointment details</h1>
+            {% include 'frontend/partials/_status_badge.html' with status=appointment.status label=appointment.get_status_display %}
+        </div>
+
+        <dl class="grid grid-cols-[130px_1fr] gap-y-3 text-sm border-t border-border pt-5">
+            <dt class="text-foreground/55">Name</dt>   <dd class="font-medium text-foreground">{{ appointment.patient_name }}</dd>
+            <dt class="text-foreground/55">Phone</dt>  <dd class="font-medium text-foreground">{{ appointment.phone_number }}</dd>
+            <dt class="text-foreground/55">Email</dt>  <dd class="font-medium text-foreground">{{ appointment.email|default:"—" }}</dd>
+            <dt class="text-foreground/55">Date</dt>   <dd class="font-medium text-foreground">{{ appointment.preferred_date|date:"D, j M Y" }}</dd>
+            <dt class="text-foreground/55">Time</dt>   <dd class="font-medium text-foreground">{{ appointment.preferred_time|time:"g:i A" }}</dd>
+            <dt class="text-foreground/55">Reason</dt> <dd class="font-medium text-foreground">{{ appointment.reason_for_visit }}</dd>
+        </dl>
+
+        {% if appointment.status == 'PENDING' or appointment.status == 'CONFIRMED' %}
+            <div class="flex flex-wrap items-center gap-3 mt-6 pt-5 border-t border-border">
+                <a href="{% url 'frontend:appointment-edit' appointment.pk %}"
+                   class="bg-accent text-white font-medium text-sm px-5 py-2.5 rounded-pill hover:bg-accent-hover transition">
+                    Edit / reschedule
+                </a>
+                <form method="post" action="{% url 'frontend:appointment-cancel' appointment.pk %}"
+                      onsubmit="return confirm('Cancel this appointment?');">
+                    {% csrf_token %}
+                    <button type="submit" class="text-sm font-medium text-danger border border-danger/25 px-5 py-2.5 rounded-pill hover:bg-danger hover:text-white transition">
+                        Cancel appointment
+                    </button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

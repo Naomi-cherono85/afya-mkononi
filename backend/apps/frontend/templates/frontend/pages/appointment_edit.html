@@ -1,0 +1,44 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Edit appointment — Afya Mkononi{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto flex flex-col gap-4">
+
+    <a href="{% url 'frontend:appointment-detail' appointment.pk %}" class="inline-flex items-center gap-1.5 text-sm font-medium text-foreground/60 hover:text-foreground">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+        Back to details
+    </a>
+
+    <div class="bg-background rounded-card shadow-card p-5 sm:p-6">
+        <h1 class="text-xl font-bold text-foreground mb-1">Edit appointment</h1>
+        <p class="text-foreground/60 text-sm mb-5">Change the date or time to reschedule, or update your details.</p>
+
+        <form method="post" novalidate class="flex flex-col gap-4">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="p-3 rounded-soft bg-danger-soft text-danger text-sm border border-danger/20">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="grid sm:grid-cols-2 gap-x-3">
+                {% include 'accounts/_field.html' with field=form.patient_name %}
+                {% include 'accounts/_field.html' with field=form.phone_number %}
+            </div>
+            {% include 'accounts/_field.html' with field=form.email %}
+            <div class="grid sm:grid-cols-2 gap-x-3">
+                {% include 'accounts/_field.html' with field=form.preferred_date %}
+                {% include 'accounts/_field.html' with field=form.preferred_time %}
+            </div>
+            {% include 'accounts/_field.html' with field=form.reason_for_visit %}
+
+            <div class="flex items-center gap-3">
+                <button type="submit" class="bg-accent text-white font-medium text-sm px-6 py-2.5 rounded-pill hover:bg-accent-hover transition">
+                    Save changes
+                </button>
+                <a href="{% url 'frontend:appointment-detail' appointment.pk %}" class="text-sm font-medium text-foreground/60 hover:text-foreground">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

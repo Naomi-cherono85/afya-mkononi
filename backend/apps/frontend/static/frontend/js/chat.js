@@ -81,6 +81,8 @@
 
     // Build the rendered attachment for a user bubble.
     // `att` = { url, name, is_image }.
+    // Images and PDFs preview inline (no download needed); other docs show a
+    // labelled link that opens in a new tab.
     const buildAttachment = (att) => {
         if (att.is_image) {
             const link = document.createElement('a');
@@ -94,6 +96,10 @@
             link.appendChild(img);
             return link;
         }
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'flex flex-col gap-2';
+
         const link = document.createElement('a');
         link.href = att.url;
         link.target = '_blank';
@@ -104,10 +110,31 @@
             '<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/></svg>' +
             '<span class="truncate"></span>';
         link.querySelector('span').textContent = att.name;
-        return link;
+        wrapper.appendChild(link);
+
+        // PDFs get an inline, toggleable preview so they can be read without downloading.
+        if (extOf(att.name) === 'pdf') {
+            const toggle = document.createElement('button');
+            toggle.type = 'button';
+            toggle.className = 'self-start text-xs font-medium text-accent hover:underline';
+            toggle.textContent = 'Preview PDF';
+            const frame = document.createElement('iframe');
+            frame.src = att.url;
+            frame.title = att.name;
+            frame.className = 'hidden w-full h-80 rounded-lg border border-border bg-white';
+            toggle.addEventListener('click', () => {
+                const nowHidden = frame.classList.toggle('hidden');
+                toggle.textContent = nowHidden ? 'Preview PDF' : 'Hide preview';
+                if (!nowHidden) thread.scrollTop = thread.scrollHeight;
+            });
+            wrapper.appendChild(toggle);
+            wrapper.appendChild(frame);
+        }
+        return wrapper;
     };
 
     const appendUser = (text, attachments) => {
+        removeFollowups();  // the previous turn's suggestions no longer apply
         const node = userTpl.content.firstElementChild.cloneNode(true);
         const slot = node.querySelector('[data-content]');
         if (text) {
@@ -134,6 +161,44 @@
         slot.classList.remove('whitespace-pre-line');
         slot.innerHTML = renderMarkdown(text);
         thread.appendChild(node);
+        thread.scrollTop = thread.scrollHeight;
+    };
+
+    // ---- Suggested follow-up chips (shown under the latest AI reply) ----
+
+    const FOLLOWUP_SUGGESTIONS = [
+        'Tell me more',
+        'What should I do?',
+        'Should I see a doctor?',
+        'Prevention tips',
+        'Related symptoms',
+    ];
+    // Never nudge further self-exploration on emergency or refused replies —
+    // the safe action there is to seek professional/emergency care.
+    const SUPPRESS_CHIP_CATEGORIES = ['EMERGENCY', 'REFUSED'];
+
+    const removeFollowups = () => {
+        thread.querySelectorAll('[data-followups]').forEach((el) => el.remove());
+    };
+
+    const showFollowups = (safetyCategory) => {
+        removeFollowups();
+        if (SUPPRESS_CHIP_CATEGORIES.includes(safetyCategory)) return;
+        const group = document.createElement('div');
+        group.dataset.followups = '1';
+        group.className = 'flex flex-wrap gap-2 ml-12';
+        FOLLOWUP_SUGGESTIONS.forEach((label) => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'followup-chip text-xs font-medium px-3 py-1.5 rounded-pill border border-border bg-background text-foreground/75 hover:border-accent hover:bg-accent-soft/60 hover:text-accent transition';
+            chip.textContent = label;
+            chip.addEventListener('click', () => {
+                if (pending) return;
+                sendMessage(label);
+            });
+            group.appendChild(chip);
+        });
+        thread.appendChild(group);
         thread.scrollTop = thread.scrollHeight;
     };
 
@@ -227,13 +292,17 @@
             conversationId = data.id;
             if (titleEl) titleEl.textContent = data.display_title || 'Chat Assistant';
             clearThread();
+            let lastAiSafety = null;
             (data.messages || []).forEach((m) => {
                 if (m.sender_type === 'USER') {
                     appendUser(m.message_content, m.attachments || []);
                 } else if (m.sender_type === 'AI') {
                     appendAi(m.message_content);
+                    lastAiSafety = m.safety_category;
                 }
             });
+            // Offer follow-ups under the most recent AI reply only.
+            if (lastAiSafety !== null) showFollowups(lastAiSafety);
             setActive(id);
         } catch (err) {
             loading.classList.add('hidden');
@@ -450,6 +519,7 @@
                 if (data.conversation_id) conversationId = data.conversation_id;
                 if (data.title && titleEl) titleEl.textContent = data.title;
                 appendAi(data.reply || '(no reply)');
+                showFollowups(data.safety_category);
                 if (conversationId) upsertConversation(conversationId, data.title || 'New conversation');
             } else {
                 let detail = FRIENDLY_ERROR;

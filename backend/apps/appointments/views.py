@@ -1,4 +1,5 @@
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, permissions, viewsets
+
 from .models import Appointment
 from .serializers import AppointmentSerializer
 
@@ -8,7 +9,18 @@ class AppointmentViewSet(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet
 ):
-    queryset = Appointment.objects.all()
-    serializer_class = AppointmentSerializer
+    """Booking API used by the appointment-book page.
 
-# Create your views here.
+    Scoped to the signed-in user: each patient only ever lists and creates
+    their own appointments. Full management (edit/cancel/reschedule) lives in
+    the server-rendered frontend views.
+    """
+
+    serializer_class = AppointmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Appointment.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

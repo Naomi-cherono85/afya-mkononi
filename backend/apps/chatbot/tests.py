@@ -64,6 +64,17 @@ class ChatAPITest(APITestCase):
         conversation = Conversation.objects.get(user=self.user)
         self.assertEqual(conversation.title, 'Headache Assessment')
 
+    @mock.patch('apps.chatbot.services.ai_service.generate_title', return_value=None)
+    @mock.patch('apps.chatbot.views.ai_service.generate_reply')
+    def test_chat_response_includes_safety_category(self, mock_reply, _mock_title):
+        mock_reply.return_value = ('Please call 999.', Message.SafetyCategory.EMERGENCY)
+        self.client.force_authenticate(self.user)
+        response = self.client.post('/api/chat/', {'message': 'chest pain'}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Exposed so the client can suppress follow-up chips on emergencies.
+        self.assertEqual(response.data['safety_category'], Message.SafetyCategory.EMERGENCY)
+        self.assertIsNone(response.data['attachment'])
+
     def test_rename_conversation(self):
         self.client.force_authenticate(self.user)
         conversation = Conversation.objects.create(user=self.user, title='Old title')

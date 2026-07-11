@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -8,6 +9,16 @@ class Appointment(models.Model):
         CANCELLED = 'CANCELLED', 'Cancelled'
         COMPLETED = 'COMPLETED', 'Completed'
 
+    # Owner of the appointment. Nullable so pre-isolation rows survive the
+    # migration; they simply become invisible (no user ever matches NULL).
+    # New appointments always get an owner (set server-side in the view).
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='appointments',
+    )
     patient_name = models.CharField(max_length=200)
     phone_number = models.CharField(max_length=20)
     email = models.EmailField(blank=True, null=True)
@@ -26,6 +37,7 @@ class Appointment(models.Model):
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['status', 'preferred_date']),
+            models.Index(fields=['user', '-created_at']),
         ]
 
     def __str__(self):

@@ -30,10 +30,20 @@ class MessageInline(admin.TabularInline):
 
 @admin.register(ChatAttachment)
 class ChatAttachmentAdmin(admin.ModelAdmin):
-    list_display = ['name', 'kind', 'message', 'created_at']
+    list_display = ['name', 'kind', 'owner', 'content_type', 'created_at']
     list_filter = ['kind', 'created_at']
-    search_fields = ['original_name', 'message__conversation__id']
+    search_fields = [
+        'original_name',
+        'message__conversation__id',
+        'message__conversation__user__username',
+    ]
+    list_select_related = ['message__conversation__user']
+    date_hierarchy = 'created_at'
     readonly_fields = ['created_at']
+
+    @admin.display(description='Owner')
+    def owner(self, obj):
+        return obj.message.conversation.user
 
 
 @admin.register(Conversation)

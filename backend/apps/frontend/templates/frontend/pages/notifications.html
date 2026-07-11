@@ -1,0 +1,58 @@
+{% extends 'frontend/base.html' %}
+
+{% block title %}Notifications — Afya Mkononi{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto flex flex-col gap-4">
+
+    <div class="flex items-center justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-bold text-foreground">Notifications</h1>
+            <p class="text-foreground/60 text-sm mt-0.5">Updates about your appointments, reminders and profile.</p>
+        </div>
+        {% if unread_notifications_count %}
+            <form method="post" action="{% url 'frontend:notification-read-all' %}">
+                {% csrf_token %}
+                <button type="submit" class="text-sm font-medium text-accent bg-accent-soft px-4 py-2 rounded-pill hover:bg-accent-tint transition shrink-0">
+                    Mark all read
+                </button>
+            </form>
+        {% endif %}
+    </div>
+
+    {% if notifications %}
+        <ul class="flex flex-col gap-2">
+            {% for n in notifications %}
+                <li>
+                    <form method="post" action="{% url 'frontend:notification-read' n.pk %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="w-full text-left flex items-start gap-3 bg-background rounded-card shadow-card p-4 hover:shadow-card-hover transition {% if not n.is_read %}ring-1 ring-accent-tint{% endif %}">
+                            <span class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 {% if n.is_read %}bg-muted text-foreground/50{% else %}bg-accent-soft text-accent{% endif %}">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+                            </span>
+                            <span class="min-w-0 flex-1">
+                                <span class="flex items-center gap-2">
+                                    <span class="font-semibold text-sm text-foreground truncate">{{ n.title }}</span>
+                                    {% if not n.is_read %}<span class="w-2 h-2 rounded-full bg-accent shrink-0"></span>{% endif %}
+                                </span>
+                                {% if n.message %}<span class="block text-sm text-foreground/65 mt-0.5">{{ n.message }}</span>{% endif %}
+                                <span class="block text-xs text-foreground/45 mt-1">{{ n.created_at|date:"D, j M Y, g:i A" }}</span>
+                            </span>
+                        </button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+        {% include 'frontend/partials/_pagination.html' with page_obj=notifications %}
+    {% else %}
+        <div class="bg-background rounded-card shadow-card p-10 text-center">
+            <div class="w-12 h-12 mx-auto rounded-full bg-accent-soft flex items-center justify-center mb-3">
+                <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"/></svg>
+            </div>
+            <p class="text-sm text-foreground/60">You're all caught up — no notifications yet.</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
