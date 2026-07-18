@@ -21,23 +21,25 @@ class AppointmentManagementTests(TestCase):
         )
 
     def test_list_shows_only_own(self):
-        Appointment.objects.create(
+        # The redesigned list renders a table of rows linking to each detail
+        # page, so we assert on the presence/absence of those links.
+        other_appt = Appointment.objects.create(
             user=self.other, patient_name='Someone else', phone_number='1',
             preferred_date='2026-08-02', preferred_time='11:00:00', reason_for_visit='x',
         )
         resp = self.client.get(reverse('frontend:appointment-list'))
         self.assertEqual(resp.status_code, 200)
-        self.assertContains(resp, 'Check-up')
-        self.assertNotContains(resp, 'Someone else')
+        self.assertContains(resp, reverse('frontend:appointment-detail', args=[self.appt.pk]))
+        self.assertNotContains(resp, reverse('frontend:appointment-detail', args=[other_appt.pk]))
 
     def test_search_filters(self):
-        Appointment.objects.create(
+        match = Appointment.objects.create(
             user=self.user, patient_name='Naomi', phone_number='0700',
             preferred_date='2026-08-03', preferred_time='09:00:00', reason_for_visit='Malaria test',
         )
         resp = self.client.get(reverse('frontend:appointment-list'), {'q': 'malaria'})
-        self.assertContains(resp, 'Malaria test')
-        self.assertNotContains(resp, 'Check-up')
+        self.assertContains(resp, reverse('frontend:appointment-detail', args=[match.pk]))
+        self.assertNotContains(resp, reverse('frontend:appointment-detail', args=[self.appt.pk]))
 
     def test_detail_blocks_other_users_appointment(self):
         other_appt = Appointment.objects.create(
@@ -50,8 +52,10 @@ class AppointmentManagementTests(TestCase):
     def test_edit_reschedule(self):
         resp = self.client.post(reverse('frontend:appointment-edit', args=[self.appt.pk]), {
             'patient_name': 'Naomi', 'phone_number': '0700', 'email': '',
+            'appointment_type': Appointment.AppointmentType.GENERAL,
+            'doctor': '', 'clinic': '',
             'preferred_date': '2026-09-15', 'preferred_time': '14:30:00',
-            'reason_for_visit': 'Check-up',
+            'reason_for_visit': 'Check-up', 'additional_notes': '',
         })
         self.assertRedirects(resp, reverse('frontend:appointment-detail', args=[self.appt.pk]))
         self.appt.refresh_from_db()

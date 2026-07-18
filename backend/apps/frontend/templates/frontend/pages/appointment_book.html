@@ -4,152 +4,235 @@
 {% block title %}Book an appointment — Afya Mkononi{% endblock %}
 
 {% block content %}
-<div class="grid xl:grid-cols-[1fr_320px] gap-5">
+<div class="grid xl:grid-cols-[1fr_340px] gap-5 items-start">
 
-    <section class="min-w-0">
+    {# ==================== LEFT: booking form ==================== #}
+    <section class="min-w-0 flex flex-col gap-5">
 
-        <div id="appt-form-card" class="bg-background rounded-card shadow-card p-6">
+        <div class="bg-background rounded-card shadow-card p-6">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-11 h-11 rounded-soft bg-accent-soft flex items-center justify-center shrink-0">
                     <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-foreground">Book an appointment</h1>
-                    <p class="text-foreground/60 text-sm mt-0.5">Pick a date and time and tell us briefly what you'd like to see the clinic about.</p>
+                    <p class="text-foreground/60 text-sm mt-0.5">Tell us who you are, then choose a type, date and time.</p>
                 </div>
             </div>
 
-            <div id="appt-form-error" class="hidden mb-4 p-3 rounded-soft bg-danger-soft text-danger text-sm border border-danger/20"></div>
+            {% if ai_suggested %}
+                <div class="afya-fade-in flex items-start gap-2.5 mb-5 p-3.5 rounded-soft bg-accent-soft border border-accent-tint text-sm">
+                    <svg class="w-5 h-5 text-accent shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z"/></svg>
+                    <span class="text-deep-green">This appointment was suggested by Afya Mkononi. Review the details below and adjust anything you like.</span>
+                </div>
+            {% endif %}
 
-            <form id="appt-form" novalidate class="flex flex-col gap-5">
+            {% if form.non_field_errors %}
+                <div class="mb-5 p-3 rounded-soft bg-danger-soft text-danger text-sm border border-danger/20">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <form id="appt-form" method="post" action="" novalidate class="flex flex-col gap-6">
                 {% csrf_token %}
+                {% if ai_suggested %}<input type="hidden" name="source" value="CHATBOT">{% endif %}
 
-                <div class="grid md:grid-cols-2 gap-5">
-                    <div>
-                        <label for="patient_name" class="block text-sm font-medium text-foreground mb-1.5">Full name</label>
-                        <input type="text" id="patient_name" name="patient_name" required
-                               class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
-                        <p class="hidden mt-1 text-xs text-danger" data-error-for="patient_name"></p>
+                {# ---------- Patient information ---------- #}
+                <fieldset class="flex flex-col gap-4">
+                    <legend class="text-xs font-semibold uppercase tracking-wide text-foreground/45 mb-1">Patient information</legend>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="{{ form.patient_name.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">Full name <span class="text-danger">*</span></label>
+                            {{ form.patient_name }}
+                            {% for e in form.patient_name.errors %}<p class="mt-1 text-xs text-danger">{{ e }}</p>{% endfor %}
+                        </div>
+                        <div>
+                            <label for="{{ form.phone_number.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">Phone number <span class="text-danger">*</span></label>
+                            {{ form.phone_number }}
+                            {% for e in form.phone_number.errors %}<p class="mt-1 text-xs text-danger">{{ e }}</p>{% endfor %}
+                        </div>
                     </div>
                     <div>
-                        <label for="phone_number" class="block text-sm font-medium text-foreground mb-1.5">Phone number</label>
-                        <input type="tel" id="phone_number" name="phone_number" required placeholder="+254 700 000 000"
-                               class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
-                        <p class="hidden mt-1 text-xs text-danger" data-error-for="phone_number"></p>
+                        <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">Email <span class="text-foreground/50 font-normal">(optional)</span></label>
+                        {{ form.email }}
+                        {% for e in form.email.errors %}<p class="mt-1 text-xs text-danger">{{ e }}</p>{% endfor %}
                     </div>
-                </div>
+                </fieldset>
 
-                <div>
-                    <label for="email" class="block text-sm font-medium text-foreground mb-1.5">Email <span class="text-foreground/50 font-normal">(optional)</span></label>
-                    <input type="email" id="email" name="email"
-                           class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
-                    <p class="hidden mt-1 text-xs text-danger" data-error-for="email"></p>
-                </div>
+                {# ---------- Appointment details ---------- #}
+                <fieldset class="flex flex-col gap-4 pt-2 border-t border-border/70">
+                    <legend class="text-xs font-semibold uppercase tracking-wide text-foreground/45 mb-1">Appointment details</legend>
 
-                <div class="grid md:grid-cols-2 gap-5">
                     <div>
-                        <label for="preferred_date" class="block text-sm font-medium text-foreground mb-1.5">Preferred date</label>
-                        <input type="date" id="preferred_date" name="preferred_date" required
-                               class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
-                        <p class="hidden mt-1 text-xs text-danger" data-error-for="preferred_date"></p>
+                        <label for="{{ form.appointment_type.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">Appointment type <span class="text-danger">*</span></label>
+                        {{ form.appointment_type }}
+                        {% for e in form.appointment_type.errors %}<p class="mt-1 text-xs text-danger">{{ e }}</p>{% endfor %}
                     </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="{{ form.doctor.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">Preferred doctor <span class="text-foreground/50 font-normal">(optional)</span></label>
+                            {{ form.doctor }}
+                        </div>
+                        <div>
+                            <label for="{{ form.clinic.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">Preferred clinic <span class="text-foreground/50 font-normal">(optional)</span></label>
+                            {{ form.clinic }}
+                        </div>
+                    </div>
+
                     <div>
-                        <label for="preferred_time" class="block text-sm font-medium text-foreground mb-1.5">Preferred time</label>
-                        <input type="time" id="preferred_time" name="preferred_time" required
-                               class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background">
-                        <p class="hidden mt-1 text-xs text-danger" data-error-for="preferred_time"></p>
+                        <label for="{{ form.preferred_date.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">Preferred date <span class="text-danger">*</span></label>
+                        {{ form.preferred_date }}
+                        <p id="date-hint" class="hidden mt-1.5 text-xs text-foreground/55"></p>
+                        {% for e in form.preferred_date.errors %}<p class="mt-1 text-xs text-danger">{{ e }}</p>{% endfor %}
                     </div>
-                </div>
 
-                <div>
-                    <label for="reason_for_visit" class="block text-sm font-medium text-foreground mb-1.5">Reason for visit</label>
-                    <textarea id="reason_for_visit" name="reason_for_visit" required rows="3"
-                              placeholder="A short description of what you'd like to see the clinic about."
-                              class="w-full px-3.5 py-2.5 rounded-soft border border-border focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/15 text-sm bg-background resize-none"></textarea>
-                    <p class="hidden mt-1 text-xs text-danger" data-error-for="reason_for_visit"></p>
-                </div>
+                    {# Native time input — used as fallback and as the submitted value. #}
+                    <div data-native-time>
+                        <label for="{{ form.preferred_time.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">Preferred time <span class="text-danger">*</span></label>
+                        {{ form.preferred_time }}
+                        {% for e in form.preferred_time.errors %}<p class="mt-1 text-xs text-danger" data-time-error>{{ e }}</p>{% endfor %}
+                    </div>
 
-                <div class="flex items-center justify-between pt-2 border-t border-border/70">
+                    {# Smart slot grid — revealed by JS, writes into the time input above. #}
+                    <div data-slot-picker class="hidden">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <span class="block text-sm font-medium text-foreground">Available time slots <span class="text-danger">*</span></span>
+                            <span id="slot-status" class="text-xs text-foreground/50" aria-live="polite"></span>
+                        </div>
+                        <div id="slot-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 min-h-[3rem]"></div>
+                        {% for e in form.preferred_time.errors %}<p class="mt-1.5 text-xs text-danger">{{ e }}</p>{% endfor %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.reason_for_visit.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">Reason for visit <span class="text-danger">*</span></label>
+                        {{ form.reason_for_visit }}
+                        {% for e in form.reason_for_visit.errors %}<p class="mt-1 text-xs text-danger">{{ e }}</p>{% endfor %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.additional_notes.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">Additional notes <span class="text-foreground/50 font-normal">(optional)</span></label>
+                        {{ form.additional_notes }}
+                    </div>
+                </fieldset>
+
+                <div class="flex items-center justify-between gap-3 pt-2 border-t border-border/70">
                     <p class="text-xs text-foreground/50">The clinic will confirm your appointment shortly.</p>
                     <button type="submit" id="appt-submit"
-                            class="px-6 py-2.5 bg-accent text-white rounded-pill text-sm font-semibold hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm">
-                        Book appointment
+                            class="inline-flex items-center gap-2 px-6 py-2.5 bg-accent text-white rounded-pill text-sm font-semibold hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm">
+                        <svg id="appt-spinner" class="hidden w-4 h-4 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-opacity="0.25"/><path stroke-linecap="round" d="M21 12a9 9 0 0 0-9-9"/></svg>
+                        <span>Book appointment</span>
                     </button>
                 </div>
             </form>
         </div>
 
-        <div id="appt-success-card" class="hidden bg-background rounded-card shadow-card p-6">
-            <div class="flex items-start gap-4 mb-6">
-                <div class="w-12 h-12 rounded-full bg-accent-soft flex items-center justify-center shrink-0 ring-4 ring-accent-tint/40">
-                    <svg class="w-7 h-7 text-accent" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/>
-                    </svg>
-                </div>
-                <div class="min-w-0">
-                    <h2 class="text-xl font-bold text-foreground mb-1">Appointment booked</h2>
-                    <p class="text-foreground/60 text-sm">Your appointment has been recorded. The clinic will confirm shortly.</p>
-                </div>
+        {# ==================== BOTTOM: appointment history ==================== #}
+        <div class="bg-background rounded-card shadow-card p-6">
+            <div class="flex items-center justify-between gap-3 mb-4">
+                <h2 class="font-semibold text-foreground">Appointment history</h2>
+                <a href="{% url 'frontend:appointment-list' %}" class="text-sm font-medium text-accent hover:underline shrink-0">View all &rarr;</a>
             </div>
-
-            <dl class="grid grid-cols-[140px_1fr] gap-y-3 text-sm mb-6 border-t border-border pt-5">
-                <dt class="text-foreground/55">Name</dt>      <dd class="font-medium text-foreground" data-field="patient_name"></dd>
-                <dt class="text-foreground/55">Phone</dt>     <dd class="font-medium text-foreground" data-field="phone_number"></dd>
-                <dt class="text-foreground/55">Date</dt>      <dd class="font-medium text-foreground" data-field="preferred_date"></dd>
-                <dt class="text-foreground/55">Time</dt>      <dd class="font-medium text-foreground" data-field="preferred_time"></dd>
-                <dt class="text-foreground/55">Reason</dt>    <dd class="font-medium text-foreground" data-field="reason_for_visit"></dd>
-                <dt class="text-foreground/55">Status</dt>    <dd><span class="text-xs font-medium px-2 py-0.5 rounded-pill bg-primary/10 text-primary" data-field="status"></span></dd>
-            </dl>
-
-            <div class="flex gap-3">
-                <button type="button" id="appt-book-another"
-                        class="px-5 py-2.5 bg-accent text-white rounded-pill text-sm font-semibold hover:bg-accent-hover transition shadow-sm">
-                    Book another
-                </button>
-                <a href="{% url 'frontend:dashboard' %}"
-                   class="px-5 py-2.5 bg-muted text-foreground rounded-pill text-sm font-semibold border border-border hover:bg-background transition">
-                    Back to dashboard
-                </a>
-            </div>
+            {% include 'frontend/partials/_appointment_history_table.html' with appointments=recent_appointments empty_hint="You haven't booked any appointments yet." %}
         </div>
 
     </section>
 
-    <aside class="flex flex-col gap-4">
+    {# ==================== RIGHT: information rail ==================== #}
+    <aside class="flex flex-col gap-4 xl:sticky xl:top-6">
+
+        {# Live booking summary #}
         <div class="bg-background rounded-card shadow-card p-5">
             <div class="flex items-center gap-2 mb-3">
                 <div class="w-7 h-7 rounded-soft bg-accent-soft flex items-center justify-center">
-                    <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                    <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25Z"/></svg>
                 </div>
-                <h3 class="font-semibold text-sm text-foreground">Recent appointments</h3>
+                <h3 class="font-semibold text-sm text-foreground">Appointment summary</h3>
             </div>
-            {% if recent_appointments %}
-                <ul class="flex flex-col gap-3">
-                    {% for appt in recent_appointments %}
-                        <li class="bg-muted/40 border border-border/60 rounded-soft p-3.5">
-                            <div class="text-sm font-medium text-foreground truncate">{{ appt.reason_for_visit|truncatechars:32 }}</div>
-                            <div class="text-xs text-foreground/60 mt-1">{{ appt.preferred_date|date:"D, j M" }} &middot; {{ appt.preferred_time|time:"g:i A" }}</div>
-                            <span class="inline-block mt-2 text-xs font-medium px-2 py-0.5 rounded-pill
-                                {% if appt.status == 'CONFIRMED' %}bg-accent/15 text-accent
-                                {% elif appt.status == 'PENDING' %}bg-primary/10 text-primary
-                                {% elif appt.status == 'COMPLETED' %}bg-muted text-foreground/60
-                                {% else %}bg-danger-soft text-danger{% endif %}">
-                                {{ appt.get_status_display }}
-                            </span>
-                        </li>
-                    {% endfor %}
-                </ul>
+            <dl class="flex flex-col gap-2.5 text-sm">
+                <div class="flex items-start justify-between gap-3">
+                    <dt class="text-foreground/55 shrink-0">Type</dt>
+                    <dd class="font-medium text-foreground text-right" data-summary="type">General Consultation</dd>
+                </div>
+                <div class="flex items-start justify-between gap-3">
+                    <dt class="text-foreground/55 shrink-0">Date</dt>
+                    <dd class="font-medium text-foreground text-right" data-summary="date">—</dd>
+                </div>
+                <div class="flex items-start justify-between gap-3">
+                    <dt class="text-foreground/55 shrink-0">Time</dt>
+                    <dd class="font-medium text-foreground text-right" data-summary="time">—</dd>
+                </div>
+                <div class="flex items-start justify-between gap-3">
+                    <dt class="text-foreground/55 shrink-0">Doctor</dt>
+                    <dd class="font-medium text-foreground text-right" data-summary="doctor">Any available doctor</dd>
+                </div>
+            </dl>
+        </div>
+
+        {# Your next appointment #}
+        <div class="bg-background rounded-card shadow-card p-5">
+            <h3 class="font-semibold text-sm text-foreground mb-3">Your next appointment</h3>
+            {% if next_appointment %}
+                <div class="bg-muted/40 border border-border/60 rounded-soft p-4">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="text-sm font-semibold text-foreground truncate">{{ next_appointment.doctor.name|default:"Any available doctor" }}</span>
+                        {% include 'frontend/partials/_status_badge.html' with status=next_appointment.status label=next_appointment.get_status_display %}
+                    </div>
+                    <dl class="flex flex-col gap-1 text-xs text-foreground/70">
+                        <div class="flex items-center gap-1.5"><span class="text-foreground/45">Clinic</span> <span class="font-medium text-foreground">{{ next_appointment.clinic.name|default:"—" }}</span></div>
+                        <div class="flex items-center gap-1.5"><span class="text-foreground/45">Date</span> <span class="font-medium text-foreground">{{ next_appointment.preferred_date|date:"D, j M Y" }}</span></div>
+                        <div class="flex items-center gap-1.5"><span class="text-foreground/45">Time</span> <span class="font-medium text-foreground">{{ next_appointment.preferred_time|time:"g:i A" }}</span></div>
+                    </dl>
+                    <div class="flex items-center gap-3 mt-3 pt-3 border-t border-border/60 text-xs font-medium">
+                        <a href="{% url 'frontend:appointment-detail' next_appointment.pk %}" class="text-accent hover:underline">View details</a>
+                        <a href="{% url 'frontend:appointment-reschedule' next_appointment.pk %}" class="text-foreground/70 hover:text-foreground">Reschedule</a>
+                        <form method="post" action="{% url 'frontend:appointment-cancel' next_appointment.pk %}" onsubmit="return confirm('Cancel this appointment?');">
+                            {% csrf_token %}
+                            <button type="submit" class="text-danger hover:underline">Cancel</button>
+                        </form>
+                    </div>
+                </div>
             {% else %}
                 <div class="bg-muted/40 rounded-soft p-4 text-center">
-                    <p class="text-xs text-foreground/60">No appointments yet.</p>
+                    <p class="text-xs text-foreground/60">No upcoming appointments.</p>
                 </div>
             {% endif %}
         </div>
+
+        {# Clinic hours #}
+        <div class="bg-background rounded-card shadow-card p-5">
+            <div class="flex items-center gap-2 mb-3">
+                <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+                <h3 class="font-semibold text-sm text-foreground">Clinic hours</h3>
+            </div>
+            <dl class="flex flex-col gap-1.5 text-sm">
+                <div class="flex items-center justify-between"><dt class="text-foreground/60">Monday–Friday</dt><dd class="font-medium text-foreground">8:00 AM – 5:00 PM</dd></div>
+                <div class="flex items-center justify-between"><dt class="text-foreground/60">Saturday</dt><dd class="font-medium text-foreground">8:00 AM – 1:00 PM</dd></div>
+                <div class="flex items-center justify-between"><dt class="text-foreground/60">Sunday</dt><dd class="font-medium text-danger">Closed</dd></div>
+            </dl>
+        </div>
+
+        {# Need urgent care #}
+        <div class="bg-danger-soft rounded-card p-5 border border-danger/15">
+            <div class="flex items-start gap-3 mb-3">
+                <div class="w-9 h-9 rounded-soft bg-background flex items-center justify-center shrink-0 shadow-sm">
+                    <svg class="w-5 h-5 text-danger" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                </div>
+                <div class="min-w-0">
+                    <div class="font-semibold text-foreground text-sm">Need urgent care?</div>
+                    <p class="text-xs text-foreground/65 mt-1 leading-relaxed">If this is an emergency, don't wait to book — call your local emergency number now.</p>
+                </div>
+            </div>
+            <a href="{% url 'frontend:about' %}#emergency" class="block w-full text-center bg-background text-danger font-medium text-sm py-2 rounded-pill border border-danger/25 hover:bg-danger hover:text-white hover:border-danger transition">
+                Emergency Guide
+            </a>
+        </div>
+
     </aside>
 
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="{% static 'frontend/js/appointment_form.js' %}" defer></script>
+<script>window.AFYA_TODAY = "{{ today_iso }}";</script>
+<script src="{% static 'frontend/js/appointment_booking.js' %}" defer></script>
 {% endblock %}

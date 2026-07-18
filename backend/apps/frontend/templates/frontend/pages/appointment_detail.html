@@ -11,25 +11,36 @@
     </a>
 
     <div class="bg-background rounded-card shadow-card p-5 sm:p-6">
-        <div class="flex items-start justify-between gap-3 mb-5">
+        <div class="flex items-start justify-between gap-3 mb-1">
             <h1 class="text-xl font-bold text-foreground">Appointment details</h1>
             {% include 'frontend/partials/_status_badge.html' with status=appointment.status label=appointment.get_status_display %}
         </div>
+        <p class="text-xs text-foreground/50 mb-5">Reference {{ appointment.reference }}</p>
 
         <dl class="grid grid-cols-[130px_1fr] gap-y-3 text-sm border-t border-border pt-5">
             <dt class="text-foreground/55">Name</dt>   <dd class="font-medium text-foreground">{{ appointment.patient_name }}</dd>
             <dt class="text-foreground/55">Phone</dt>  <dd class="font-medium text-foreground">{{ appointment.phone_number }}</dd>
             <dt class="text-foreground/55">Email</dt>  <dd class="font-medium text-foreground">{{ appointment.email|default:"—" }}</dd>
+            <dt class="text-foreground/55">Type</dt>   <dd class="font-medium text-foreground">{{ appointment.get_appointment_type_display }}</dd>
+            <dt class="text-foreground/55">Doctor</dt> <dd class="font-medium text-foreground">{{ appointment.doctor.name|default:"Any available doctor" }}</dd>
+            <dt class="text-foreground/55">Clinic</dt> <dd class="font-medium text-foreground">{{ appointment.clinic.name|default:"Any clinic" }}</dd>
             <dt class="text-foreground/55">Date</dt>   <dd class="font-medium text-foreground">{{ appointment.preferred_date|date:"D, j M Y" }}</dd>
             <dt class="text-foreground/55">Time</dt>   <dd class="font-medium text-foreground">{{ appointment.preferred_time|time:"g:i A" }}</dd>
             <dt class="text-foreground/55">Reason</dt> <dd class="font-medium text-foreground">{{ appointment.reason_for_visit }}</dd>
+            {% if appointment.additional_notes %}
+                <dt class="text-foreground/55">Notes</dt> <dd class="font-medium text-foreground">{{ appointment.additional_notes }}</dd>
+            {% endif %}
         </dl>
 
-        {% if appointment.status == 'PENDING' or appointment.status == 'CONFIRMED' %}
+        {% if appointment.status == 'PENDING' or appointment.status == 'CONFIRMED' or appointment.status == 'RESCHEDULED' %}
             <div class="flex flex-wrap items-center gap-3 mt-6 pt-5 border-t border-border">
-                <a href="{% url 'frontend:appointment-edit' appointment.pk %}"
+                <a href="{% url 'frontend:appointment-reschedule' appointment.pk %}"
                    class="bg-accent text-white font-medium text-sm px-5 py-2.5 rounded-pill hover:bg-accent-hover transition">
-                    Edit / reschedule
+                    Reschedule
+                </a>
+                <a href="{% url 'frontend:appointment-edit' appointment.pk %}"
+                   class="text-sm font-medium text-foreground border border-border px-5 py-2.5 rounded-pill hover:border-accent hover:text-accent transition">
+                    Edit details
                 </a>
                 <form method="post" action="{% url 'frontend:appointment-cancel' appointment.pk %}"
                       onsubmit="return confirm('Cancel this appointment?');">

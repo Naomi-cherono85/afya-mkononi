@@ -25,6 +25,15 @@ class Reminder(models.Model):
         blank=True,
         related_name='reminders',
     )
+    # Set when the reminder was auto-created for an appointment (24h / 2h before).
+    # Lets us find, refresh or cancel an appointment's reminders idempotently.
+    appointment = models.ForeignKey(
+        'appointments.Appointment',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='reminders',
+    )
     patient_name = models.CharField(max_length=200)
     reminder_type = models.CharField(
         max_length=20,

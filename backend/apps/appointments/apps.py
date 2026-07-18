@@ -4,3 +4,7 @@ from django.apps import AppConfig
 class AppointmentsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'apps.appointments'
+
+    def ready(self):
+        # Register the reminder-sync signal handlers.
+        from . import signals  # noqa: F401

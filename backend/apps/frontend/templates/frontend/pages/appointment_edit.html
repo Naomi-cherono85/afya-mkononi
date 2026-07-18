@@ -12,7 +12,8 @@
 
     <div class="bg-background rounded-card shadow-card p-5 sm:p-6">
         <h1 class="text-xl font-bold text-foreground mb-1">Edit appointment</h1>
-        <p class="text-foreground/60 text-sm mb-5">Change the date or time to reschedule, or update your details.</p>
+        <p class="text-foreground/60 text-sm mb-5">Update your details. To change the date or time, you can also
+            <a href="{% url 'frontend:appointment-reschedule' appointment.pk %}" class="text-accent font-medium hover:underline">reschedule</a>.</p>
 
         <form method="post" novalidate class="flex flex-col gap-4">
             {% csrf_token %}
@@ -25,11 +26,17 @@
                 {% include 'accounts/_field.html' with field=form.phone_number %}
             </div>
             {% include 'accounts/_field.html' with field=form.email %}
+            {% include 'accounts/_field.html' with field=form.appointment_type %}
+            <div class="grid sm:grid-cols-2 gap-x-3">
+                {% include 'accounts/_field.html' with field=form.doctor %}
+                {% include 'accounts/_field.html' with field=form.clinic %}
+            </div>
             <div class="grid sm:grid-cols-2 gap-x-3">
                 {% include 'accounts/_field.html' with field=form.preferred_date %}
                 {% include 'accounts/_field.html' with field=form.preferred_time %}
             </div>
             {% include 'accounts/_field.html' with field=form.reason_for_visit %}
+            {% include 'accounts/_field.html' with field=form.additional_notes %}
 
             <div class="flex items-center gap-3">
                 <button type="submit" class="bg-accent text-white font-medium text-sm px-6 py-2.5 rounded-pill hover:bg-accent-hover transition">

@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.appointments.forms import AppointmentForm
-from apps.appointments.models import Appointment
+from apps.appointments.models import Appointment, Clinic
 from apps.core.greetings import pick_greeting
 from apps.health_library.models import Article
 from apps.notifications.models import Notification
@@ -45,7 +45,7 @@ def dashboard(request):
         .filter(
             user=request.user,
             preferred_date__gte=today,
-            status__in=[Appointment.Status.PENDING, Appointment.Status.CONFIRMED],
+            status__in=UPCOMING_STATUSES,
         )
         .order_by('preferred_date', 'preferred_time')
         .first()
@@ -70,7 +70,7 @@ def dashboard(request):
     quick_stats = {
         'upcoming_appointments': Appointment.objects.filter(
             user=request.user, preferred_date__gte=today,
-            status__in=[Appointment.Status.PENDING, Appointment.Status.CONFIRMED],
+            status__in=UPCOMING_STATUSES,
         ).count(),
         'pending_reminders': Reminder.objects.filter(
             user=request.user, status=Reminder.Status.PENDING,
@@ -93,11 +93,85 @@ def dashboard(request):
     return render(request, 'frontend/pages/dashboard.html', context)
 
 
+# Statuses that count as "upcoming" for the sidebar / dashboard.
+UPCOMING_STATUSES = [
+    Appointment.Status.PENDING,
+    Appointment.Status.CONFIRMED,
+    Appointment.Status.RESCHEDULED,
+]
+
+
+def _booking_sidebar_context(request):
+    """Shared context for the booking page rails and bottom history."""
+    today = timezone.localdate()
+    next_appointment = (
+        Appointment.objects
+        .filter(user=request.user, preferred_date__gte=today, status__in=UPCOMING_STATUSES)
+        .select_related('doctor', 'clinic')
+        .order_by('preferred_date', 'preferred_time')
+        .first()
+    )
+    return {
+        'next_appointment': next_appointment,
+        'recent_appointments': (
+            Appointment.objects.filter(user=request.user)
+            .select_related('doctor')[:5]
+        ),
+        'clinic': Clinic.objects.filter(is_active=True).first(),
+    }
+
+
 @login_required
 def appointment_book(request):
-    recent_appointments = Appointment.objects.filter(user=request.user)[:5]
-    return render(request, 'frontend/pages/appointment_book.html', {
-        'recent_appointments': recent_appointments,
+    """Render + handle the booking form (Post/Redirect/Get to a success page)."""
+    profile = getattr(request.user, 'profile', None)
+    from_chatbot = (
+        request.GET.get('source') == 'chatbot'
+        or request.POST.get('source') == 'CHATBOT'
+    )
+
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST)
+        if form.is_valid():
+            appointment = form.save(commit=False)
+            appointment.user = request.user
+            if from_chatbot:
+                appointment.source = Appointment.Source.CHATBOT
+            appointment.save()
+            messages.success(request, 'Your appointment request has been submitted.')
+            return redirect('frontend:appointment-success', pk=appointment.pk)
+    else:
+        initial = {
+            'patient_name': request.user.get_full_name(),
+            'email': request.user.email,
+            'phone_number': getattr(profile, 'phone_number', '') if profile else '',
+        }
+        # Prefill coming from the chatbot handoff.
+        reason = request.GET.get('reason', '').strip()
+        if reason:
+            initial['reason_for_visit'] = reason
+        atype = request.GET.get('type', '').strip().upper()
+        if atype in Appointment.AppointmentType.values:
+            initial['appointment_type'] = atype
+        form = AppointmentForm(initial=initial)
+
+    context = {
+        'form': form,
+        'ai_suggested': from_chatbot,
+        'today_iso': timezone.localdate().isoformat(),
+    }
+    context.update(_booking_sidebar_context(request))
+    return render(request, 'frontend/pages/appointment_book.html', context)
+
+
+@login_required
+def appointment_success(request, pk):
+    appointment = get_object_or_404(
+        Appointment.objects.select_related('doctor', 'clinic'),
+        pk=pk, user=request.user,
+    )
+    return render(request, 'frontend/pages/appointment_success.html', {
+        'appointment': appointment,
     })
 
 
@@ -121,25 +195,48 @@ def chat(request):
 
 @login_required
 def appointment_list(request):
-    """All of the signed-in user's appointments, searchable and paginated."""
+    """All of the signed-in user's appointments, filterable/searchable/paginated."""
     q = request.GET.get('q', '').strip()
-    appointments = Appointment.objects.filter(user=request.user)
+    status = request.GET.get('status', '').upper()
+
+    appointments = Appointment.objects.filter(user=request.user).select_related('doctor')
+    if status in Appointment.Status.values:
+        appointments = appointments.filter(status=status)
+    else:
+        status = ''
     if q:
         appointments = appointments.filter(
             Q(patient_name__icontains=q)
             | Q(reason_for_visit__icontains=q)
             | Q(phone_number__icontains=q)
+            | Q(doctor__name__icontains=q)
         )
+
+    # Counts per status power the filter tabs.
+    base = Appointment.objects.filter(user=request.user)
+    status_tabs = [{'value': '', 'label': 'All', 'count': base.count()}]
+    for value, label in Appointment.Status.choices:
+        status_tabs.append({
+            'value': value,
+            'label': label,
+            'count': base.filter(status=value).count(),
+        })
+
     page = Paginator(appointments, 10).get_page(request.GET.get('page'))
     return render(request, 'frontend/pages/appointment_list.html', {
         'appointments': page,
         'q': q,
+        'status': status,
+        'status_tabs': status_tabs,
     })
 
 
 @login_required
 def appointment_detail(request, pk):
-    appointment = get_object_or_404(Appointment, pk=pk, user=request.user)
+    appointment = get_object_or_404(
+        Appointment.objects.select_related('doctor', 'clinic'),
+        pk=pk, user=request.user,
+    )
     return render(request, 'frontend/pages/appointment_detail.html', {
         'appointment': appointment,
     })
@@ -147,7 +244,7 @@ def appointment_detail(request, pk):
 
 @login_required
 def appointment_edit(request, pk):
-    """Edit an appointment — this is also how a patient reschedules (date/time)."""
+    """Edit all of an appointment's details."""
     appointment = get_object_or_404(Appointment, pk=pk, user=request.user)
     if request.method == 'POST':
         form = AppointmentForm(request.POST, instance=appointment)
@@ -160,6 +257,28 @@ def appointment_edit(request, pk):
     return render(request, 'frontend/pages/appointment_edit.html', {
         'form': form,
         'appointment': appointment,
+        'today_iso': timezone.localdate().isoformat(),
+    })
+
+
+@login_required
+def appointment_reschedule(request, pk):
+    """Pick a new date/time for an appointment; marks it as rescheduled."""
+    appointment = get_object_or_404(Appointment, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = AppointmentForm(request.POST, instance=appointment)
+        if form.is_valid():
+            updated = form.save(commit=False)
+            updated.status = Appointment.Status.RESCHEDULED
+            updated.save()
+            messages.success(request, 'Your appointment has been rescheduled.')
+            return redirect('frontend:appointment-detail', pk=updated.pk)
+    else:
+        form = AppointmentForm(instance=appointment)
+    return render(request, 'frontend/pages/appointment_reschedule.html', {
+        'form': form,
+        'appointment': appointment,
+        'today_iso': timezone.localdate().isoformat(),
     })
 
 

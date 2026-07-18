@@ -1,0 +1,84 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+
+{% block title %}Reschedule appointment — Afya Mkononi{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto flex flex-col gap-4">
+
+    <a href="{% url 'frontend:appointment-detail' appointment.pk %}" class="inline-flex items-center gap-1.5 text-sm font-medium text-foreground/60 hover:text-foreground">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/></svg>
+        Back to details
+    </a>
+
+    <div class="bg-background rounded-card shadow-card p-5 sm:p-6">
+        <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-soft bg-accent-soft flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-foreground">Reschedule appointment</h1>
+                <p class="text-foreground/60 text-sm mt-0.5">Choose a new date and time. Everything else stays the same.</p>
+            </div>
+        </div>
+
+        {% if form.non_field_errors %}
+            <div class="mb-4 p-3 rounded-soft bg-danger-soft text-danger text-sm border border-danger/20">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <form id="appt-form" method="post" action="" novalidate class="flex flex-col gap-5">
+            {% csrf_token %}
+
+            {# Unchanged fields ride along as hidden inputs (carry the instance's values). #}
+            {{ form.patient_name.as_hidden }}
+            {{ form.phone_number.as_hidden }}
+            {{ form.email.as_hidden }}
+            {{ form.appointment_type.as_hidden }}
+            {{ form.clinic.as_hidden }}
+            {{ form.reason_for_visit.as_hidden }}
+            {{ form.additional_notes.as_hidden }}
+
+            <div>
+                <label for="{{ form.doctor.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">Preferred doctor <span class="text-foreground/50 font-normal">(optional)</span></label>
+                {{ form.doctor }}
+            </div>
+
+            <div>
+                <label for="{{ form.preferred_date.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">New date <span class="text-danger">*</span></label>
+                {{ form.preferred_date }}
+                <p id="date-hint" class="hidden mt-1.5 text-xs text-foreground/55"></p>
+                {% for e in form.preferred_date.errors %}<p class="mt-1 text-xs text-danger">{{ e }}</p>{% endfor %}
+            </div>
+
+            <div data-native-time>
+                <label for="{{ form.preferred_time.id_for_label }}" class="block text-sm font-medium text-foreground mb-1.5">New time <span class="text-danger">*</span></label>
+                {{ form.preferred_time }}
+                {% for e in form.preferred_time.errors %}<p class="mt-1 text-xs text-danger" data-time-error>{{ e }}</p>{% endfor %}
+            </div>
+
+            <div data-slot-picker class="hidden">
+                <div class="flex items-center justify-between mb-1.5">
+                    <span class="block text-sm font-medium text-foreground">Available time slots <span class="text-danger">*</span></span>
+                    <span id="slot-status" class="text-xs text-foreground/50" aria-live="polite"></span>
+                </div>
+                <div id="slot-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 min-h-[3rem]"></div>
+                {% for e in form.preferred_time.errors %}<p class="mt-1.5 text-xs text-danger">{{ e }}</p>{% endfor %}
+            </div>
+
+            <div class="flex items-center gap-3 pt-1">
+                <button type="submit" id="appt-submit" class="inline-flex items-center gap-2 bg-accent text-white font-medium text-sm px-6 py-2.5 rounded-pill hover:bg-accent-hover disabled:opacity-50 transition">
+                    <svg id="appt-spinner" class="hidden w-4 h-4 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke-opacity="0.25"/><path stroke-linecap="round" d="M21 12a9 9 0 0 0-9-9"/></svg>
+                    <span>Confirm new time</span>
+                </button>
+                <a href="{% url 'frontend:appointment-detail' appointment.pk %}" class="text-sm font-medium text-foreground/60 hover:text-foreground">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>window.AFYA_TODAY = "{{ today_iso }}";</script>
+<script src="{% static 'frontend/js/appointment_booking.js' %}" defer></script>
+{% endblock %}

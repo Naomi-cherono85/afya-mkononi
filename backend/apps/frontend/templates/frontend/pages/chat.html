@@ -62,10 +62,19 @@
                     </button>
                     <h1 id="chat-title" class="font-semibold text-foreground truncate">Chat Assistant</h1>
                 </div>
-                <button type="button" id="new-chat-btn-mobile"
-                        class="xl:hidden text-sm font-medium text-accent hover:text-accent-hover shrink-0">
-                    New
-                </button>
+                <div class="flex items-center gap-3 shrink-0">
+                    <a id="chat-book-appt" href="{% url 'frontend:appointment-book' %}?source=chatbot"
+                       class="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent-hover"
+                       title="Book an appointment based on this chat">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/></svg>
+                        <span class="hidden sm:inline">Book appointment</span>
+                        <span class="sm:hidden">Book</span>
+                    </a>
+                    <button type="button" id="new-chat-btn-mobile"
+                            class="xl:hidden text-sm font-medium text-accent hover:text-accent-hover">
+                        New
+                    </button>
+                </div>
             </div>
 
             <div id="chat-thread" class="flex-1 overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-8 sm:py-8 flex flex-col gap-4">
@@ -252,4 +261,22 @@
 
 {% block scripts %}
 <script src="{% static 'frontend/js/chat.js' %}" defer></script>
+<script>
+    // Carry the latest user message into the booking form as the reason for visit,
+    // so an appointment discussed in chat arrives pre-filled ("suggested by Afya Mkononi").
+    (() => {
+        const bookLink = document.getElementById('chat-book-appt');
+        const thread = document.getElementById('chat-thread');
+        if (!bookLink || !thread) return;
+        bookLink.addEventListener('click', (e) => {
+            const userBubbles = thread.querySelectorAll('.justify-end [data-content]');
+            const last = userBubbles.length ? userBubbles[userBubbles.length - 1].textContent.trim() : '';
+            const url = new URL(bookLink.href, window.location.origin);
+            url.searchParams.set('source', 'chatbot');
+            if (last) url.searchParams.set('reason', last.slice(0, 300));
+            e.preventDefault();
+            window.location.href = url.toString();
+        });
+    })();
+</script>
 {% endblock %}

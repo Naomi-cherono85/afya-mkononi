@@ -1,11 +1,14 @@
 {% comment %}
 Reusable status pill for appointments and reminders. Pass:
-  status — the status code (e.g. 'CONFIRMED', 'PENDING', 'COMPLETED', 'CANCELLED', 'SENT')
+  status — the status code (e.g. 'CONFIRMED', 'PENDING', 'RESCHEDULED',
+           'COMPLETED', 'CANCELLED', 'MISSED', 'SENT')
   label  — the human label (e.g. appointment.get_status_display)
 Colors reuse the palette already established across the dashboard cards.
 {% endcomment %}
 <span class="inline-block text-xs font-medium px-2 py-0.5 rounded-pill
     {% if status == 'CONFIRMED' or status == 'SENT' %}bg-accent/15 text-accent
     {% elif status == 'PENDING' %}bg-primary/10 text-primary
+    {% elif status == 'RESCHEDULED' %}bg-amber-100 text-amber-700
     {% elif status == 'COMPLETED' %}bg-muted text-foreground/60
+    {% elif status == 'MISSED' %}bg-danger-soft text-danger
     {% else %}bg-danger-soft text-danger{% endif %}">{{ label }}</span>

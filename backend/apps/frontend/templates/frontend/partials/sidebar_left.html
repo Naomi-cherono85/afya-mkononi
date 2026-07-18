@@ -13,7 +13,7 @@
 
     <nav class="bg-background rounded-card shadow-card p-2 flex flex-col gap-0.5">
         {% include 'frontend/partials/_nav_item.html' with url_name='dashboard' label='Dashboard' sublabel='Home & overview' active=active icon='home' %}
-        {% include 'frontend/partials/_nav_item.html' with url_name='appointment-list' label='Appointments' sublabel='Book & manage' active=active icon='calendar' section='appointment-list appointment-book appointment-detail appointment-edit' %}
+        {% include 'frontend/partials/_nav_item.html' with url_name='appointment-list' label='Appointments' sublabel='Book & manage' active=active icon='calendar' section='appointment-list appointment-book appointment-detail appointment-edit appointment-reschedule appointment-success' %}
         {% include 'frontend/partials/_nav_item.html' with url_name='reminder-list' label='Reminders' sublabel='Medication & follow-ups' active=active icon='bell' section='reminder-list reminder-create reminder-edit' %}
         {% include 'frontend/partials/_nav_item.html' with url_name='chat' label='Chat Assistant' sublabel='Get health guidance' active=active icon='chat' %}
         {% include 'frontend/partials/_nav_item.html' with url_name='library' label='Health Library' sublabel='Trusted health articles' active=active icon='book' section='library library-article' %}
